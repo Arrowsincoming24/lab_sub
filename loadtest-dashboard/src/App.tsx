@@ -128,12 +128,12 @@ function App() {
     runButtonLabel = runProgress ? 'Running...' : 'Starting...'
   }
 
-  // Load results from broker API
+  // Load results from exchange API
   const loadResults = async (): Promise<LoadTestResults | null> => {
     setIsLoading(true)
     try {
-      // Fetch orders from broker API (use 8080 or current host)
-      const apiHost = window.location.hostname === 'localhost' ? 'localhost:8080' : window.location.host
+      // Fetch orders from exchange API (port 8090 - where load test sends orders via FIX)
+      const apiHost = window.location.hostname === 'localhost' ? 'localhost:8090' : window.location.host.replace(':5174', ':8090')
       const response = await fetch(`http://${apiHost}/api/orders?t=${Date.now()}`, { 
         cache: 'no-store',
         mode: 'cors'
