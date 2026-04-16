@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-16 13:50:17",
+  "timestamp": "2026-04-16 13:55:06",
   "users": 100,
   "connected": 100,
   "ordersSent": 200,
@@ -7,25 +7,25 @@
   "orderRejects": 0,
   "latencyIssues": 0,
   "retries": 0,
-  "elapsedSec": 2.0,
-  "throughput": 102.37,
+  "elapsedSec": 1.3,
+  "throughput": 155.55,
   "connectionRate": 100.0,
   "orderAckRate": 100.0,
   "latency": {
     "connect": {
-      "p50": 22.1,
-      "p95": 35.71,
-      "p99": 36.79
+      "p50": 32.11,
+      "p95": 48.01,
+      "p99": 50.17
     },
     "logonAck": {
-      "p50": 105.64,
-      "p95": 218.0,
-      "p99": 228.03
+      "p50": 79.61,
+      "p95": 182.45,
+      "p99": 190.83
     },
     "orderAck": {
-      "p50": 598.18,
-      "p95": 1041.15,
-      "p99": 1070.49
+      "p50": 269.12,
+      "p95": 565.67,
+      "p99": 639.5
     }
   },
   "config": {
@@ -37,25 +37,25 @@
   "kpiTrend": {
     "users": "+0%",
     "connected": "0%",
-    "throughput": "10237%",
+    "throughput": "15555%",
     "latency": "+0"
   },
   "latencyDist": [
     {
       "bucket": "<100ms",
-      "value": 0
+      "value": 14
     },
     {
       "bucket": "100-300ms",
-      "value": 23
+      "value": 131
     },
     {
       "bucket": "300-500ms",
-      "value": 63
+      "value": 37
     },
     {
       "bucket": ">500ms",
-      "value": 114
+      "value": 18
     }
   ],
   "failedRows": []
