@@ -1,0 +1,674 @@
+<!-- Watermark: Aarav Joshi -->
+<!-- Modern Trading Platform - Broker Frontend -->
+<div class="app-shell">
+  <!-- Toast Notifications -->
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts; trackBy: trackToast" 
+         class="toast" 
+         [class.success]="toast.type === 'success'"
+         [class.error]="toast.type === 'error'"
+         [class.warning]="toast.type === 'warning'"
+         [class.info]="toast.type === 'info'"
+         [@toastAnimation]>
+      <div class="toast-icon">
+        <svg *ngIf="toast.type === 'success'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <svg *ngIf="toast.type === 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+        <svg *ngIf="toast.type === 'warning'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <svg *ngIf="toast.type === 'info'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      </div>
+      <div class="toast-content">
+        <span class="toast-title">{{ toast.title }}</span>
+        <span class="toast-message">{{ toast.message }}</span>
+      </div>
+      <button class="toast-close" (click)="dismissToast(toast.id)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header glass">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <span class="logo-text">TradePro</span>
+        <span class="logo-badge">LIVE</span>
+      </div>
+    </div>
+    
+    <div class="header-center">
+      <div class="market-indices">
+        <div class="index-item" *ngFor="let index of liveMarketIndices">
+          <span class="index-name">{{ index.name }}</span>
+          <span class="index-price">{{ index.price | number:'1.2-2' }}</span>
+          <span class="index-change" [class.positive]="index.changePercent >= 0" [class.negative]="index.changePercent < 0">
+            <svg *ngIf="index.changePercent >= 0" viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+              <path d="M12 4l8 8h-6v8h-4v-8H4z"/>
+            </svg>
+            <svg *ngIf="index.changePercent < 0" viewBox="0 0 24 24" fill="currentColor" width="12" height="12">
+              <path d="M12 20l-8-8h6V4h4v8h6z"/>
+            </svg>
+            {{ index.changePercent >= 0 ? '+' : '' }}{{ index.changePercent | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="header-right">
+      <div class="connection-status" [class.connected]="isLiveConnected">
+        <span class="status-dot"></span>
+        <span class="status-text">{{ isLiveConnected ? 'LIVE' : 'OFFLINE' }}</span>
+      </div>
+      
+      <div class="user-balance" *ngIf="currentUser">
+        <span class="balance-label">Balance</span>
+        <span class="balance-value">${{ currentUser.balance | number:'1.2-2' }}</span>
+      </div>
+      
+      <button class="btn-icon" (click)="toggleWatchlistPanel()" [class.active]="showWatchlistPanel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <span class="badge" *ngIf="watchlist.length > 0">{{ watchlist.length }}</span>
+      </button>
+      
+      <button class="btn-icon" (click)="toggleAlertsPanel()" [class.active]="showAlertsPanel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="badge" *ngIf="getActiveAlerts().length > 0">{{ getActiveAlerts().length }}</span>
+      </button>
+      
+      <div class="user-menu" *ngIf="currentUser">
+        <div class="avatar">{{ currentUser.displayName?.charAt(0) || 'T' }}</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live Ticker -->
+  <div class="ticker-bar" *ngIf="liveQuotes.length > 0">
+    <div class="ticker-track">
+      <div class="ticker-content">
+        <div class="ticker-item" *ngFor="let quote of liveQuotes; trackBy: trackQuote">
+          <span class="ticker-symbol">{{ quote.symbol }}</span>
+          <span class="ticker-price">${{ quote.price | number:'1.2-2' }}</span>
+          <span class="ticker-change" [class.positive]="quote.changePercent >= 0" [class.negative]="quote.changePercent < 0">
+            {{ quote.changePercent >= 0 ? '+' : '' }}{{ quote.changePercent | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
+      <div class="ticker-content">
+        <div class="ticker-item" *ngFor="let quote of liveQuotes; trackBy: trackQuote">
+          <span class="ticker-symbol">{{ quote.symbol }}</span>
+          <span class="ticker-price">${{ quote.price | number:'1.2-2' }}</span>
+          <span class="ticker-change" [class.positive]="quote.changePercent >= 0" [class.negative]="quote.changePercent < 0">
+            {{ quote.changePercent >= 0 ? '+' : '' }}{{ quote.changePercent | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Layout -->
+  <div class="main-layout">
+    <!-- Sidebar Panels -->
+    <aside class="sidebar-panel watchlist-panel" *ngIf="showWatchlistPanel" [@slidePanel]>
+      <div class="panel-header">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          Watchlist
+        </h3>
+        <button class="btn-close" (click)="showWatchlistPanel = false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="panel-body">
+        <div class="watchlist-list" *ngIf="watchlist.length > 0">
+          <div class="watchlist-item" *ngFor="let symbol of watchlist" (click)="selectSymbol(symbol)">
+            <div class="item-info">
+              <span class="item-symbol">{{ symbol }}</span>
+              <span class="item-price" *ngIf="getQuoteForSymbol(symbol) as quote">
+                ${{ quote.price | number:'1.2-2' }}
+              </span>
+            </div>
+            <div class="item-change" *ngIf="getQuoteForSymbol(symbol) as quote" [class.positive]="quote.changePercent >= 0" [class.negative]="quote.changePercent < 0">
+              {{ quote.changePercent >= 0 ? '+' : '' }}{{ quote.changePercent | number:'1.2-2' }}%
+            </div>
+            <button class="btn-remove" (click)="toggleWatchlist(symbol); $event.stopPropagation()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="empty-state" *ngIf="watchlist.length === 0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <p>No symbols in watchlist</p>
+          <span>Click the star icon on any stock to add</span>
+        </div>
+      </div>
+    </aside>
+
+    <aside class="sidebar-panel alerts-panel" *ngIf="showAlertsPanel" [@slidePanel]>
+      <div class="panel-header">
+        <h3>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          Price Alerts
+        </h3>
+        <button class="btn-close" (click)="showAlertsPanel = false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="panel-body">
+        <div class="alert-form">
+          <div class="form-row">
+            <select [(ngModel)]="newAlert.symbol" class="input">
+              <option *ngFor="let sym of quickSymbols" [value]="sym">{{ sym }}</option>
+            </select>
+            <select [(ngModel)]="newAlert.condition" class="input">
+              <option value="above">Above</option>
+              <option value="below">Below</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <input type="number" [(ngModel)]="newAlert.targetPrice" class="input" placeholder="Price">
+            <button class="btn btn-primary" (click)="addPriceAlert()">Add Alert</button>
+          </div>
+        </div>
+        
+        <div class="alerts-list" *ngIf="getActiveAlerts().length > 0">
+          <h4>Active Alerts</h4>
+          <div class="alert-item" *ngFor="let alert of getActiveAlerts()">
+            <div class="alert-info">
+              <span class="alert-symbol">{{ alert.symbol }}</span>
+              <span class="alert-condition">{{ alert.condition }} ${{ alert.targetPrice | number:'1.2-2' }}</span>
+            </div>
+            <button class="btn-remove" (click)="removeAlert(alert.id)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon portfolio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Portfolio Value</span>
+            <span class="stat-value">${{ totalPortfolioValue | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon" [class.profit]="totalUnrealizedPnL >= 0" [class.loss]="totalUnrealizedPnL < 0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Unrealized P&L</span>
+            <span class="stat-value" [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">
+              {{ totalUnrealizedPnL >= 0 ? '+' : '' }}${{ totalUnrealizedPnL | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon positions">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Open Positions</span>
+            <span class="stat-value">{{ positions.length }}</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon orders">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Active Orders</span>
+            <span class="stat-value">{{ getOpenCount() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Column Layout -->
+      <div class="content-grid">
+        <!-- Left Column - Market Data & Orders -->
+        <div class="content-column">
+          <!-- Market Overview Card -->
+          <div class="card market-card">
+            <div class="card-header">
+              <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                Live Market Data
+              </h2>
+              <div class="header-actions">
+                <span class="live-indicator">
+                  <span class="pulse"></span>
+                  LIVE
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="market-grid">
+                <div class="market-item" *ngFor="let quote of liveQuotes.slice(0, 12); trackBy: trackQuote" 
+                     (click)="selectSymbol(quote.symbol)"
+                     [class.selected]="newOrder.symbol === quote.symbol">
+                  <div class="market-item-header">
+                    <span class="symbol">{{ quote.symbol }}</span>
+                    <button class="btn-star" [class.active]="isInWatchlist(quote.symbol)" (click)="toggleWatchlist(quote.symbol); $event.stopPropagation()">
+                      <svg viewBox="0 0 24 24" [attr.fill]="isInWatchlist(quote.symbol) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="market-item-price">${{ quote.price | number:'1.2-2' }}</div>
+                  <div class="market-item-change" [class.positive]="quote.changePercent >= 0" [class.negative]="quote.changePercent < 0">
+                    <svg *ngIf="quote.changePercent >= 0" viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                      <path d="M12 4l8 8h-6v8h-4v-8H4z"/>
+                    </svg>
+                    <svg *ngIf="quote.changePercent < 0" viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                      <path d="M12 20l-8-8h6V4h4v8h6z"/>
+                    </svg>
+                    {{ quote.changePercent >= 0 ? '+' : '' }}{{ quote.changePercent | number:'1.2-2' }}%
+                  </div>
+                  <div class="market-item-volume">
+                    Vol: {{ formatVolume(quote.volume) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Orders Table Card -->
+          <div class="card orders-card">
+            <div class="card-header">
+              <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                My Orders
+              </h2>
+              <button class="btn btn-ghost" (click)="refreshOrders()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                Refresh
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="table-container">
+                <table class="data-table" *ngIf="orders.length > 0">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>Side</th>
+                      <th class="text-right">Qty</th>
+                      <th class="text-right">Price</th>
+                      <th>Status</th>
+                      <th class="text-right">Filled</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let order of orders.slice(0, 10)">
+                      <td class="symbol-cell">{{ order.symbol }}</td>
+                      <td>
+                        <span class="side-badge" [class.buy]="order.side === '1'" [class.sell]="order.side === '2'">
+                          {{ getSideLabel(order.side) }}
+                        </span>
+                      </td>
+                      <td class="text-right mono">{{ order.quantity | number }}</td>
+                      <td class="text-right mono">${{ order.price | number:'1.2-2' }}</td>
+                      <td>
+                        <span class="status-badge" [class]="getStatusClass(order.status)">
+                          {{ order.status }}
+                        </span>
+                      </td>
+                      <td class="text-right mono">{{ order.filledQty || 0 }}</td>
+                      <td>
+                        <button class="btn btn-danger btn-sm" 
+                                (click)="cancelOrder(order.clOrdId)" 
+                                *ngIf="order.status === 'NEW' || order.status === 'PARTIALLY_FILLED'">
+                          Cancel
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="empty-state" *ngIf="orders.length === 0">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                  <p>No orders yet</p>
+                  <span>Submit an order to get started</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Positions Card -->
+          <div class="card positions-card" *ngIf="positions.length > 0">
+            <div class="card-header">
+              <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                </svg>
+                Portfolio Positions
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="table-container">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th class="text-right">Qty</th>
+                      <th class="text-right">Avg Price</th>
+                      <th class="text-right">Current</th>
+                      <th class="text-right">P&L</th>
+                      <th class="text-right">%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let pos of positions">
+                      <td class="symbol-cell">{{ pos.symbol }}</td>
+                      <td class="text-right mono">{{ pos.quantity | number }}</td>
+                      <td class="text-right mono">${{ pos.avgPrice | number:'1.2-2' }}</td>
+                      <td class="text-right mono">${{ pos.currentPrice | number:'1.2-2' }}</td>
+                      <td class="text-right mono" [class.positive]="pos.unrealizedPnL >= 0" [class.negative]="pos.unrealizedPnL < 0">
+                        {{ pos.unrealizedPnL >= 0 ? '+' : '' }}${{ pos.unrealizedPnL | number:'1.2-2' }}
+                      </td>
+                      <td class="text-right mono" [class.positive]="pos.unrealizedPnLPercent >= 0" [class.negative]="pos.unrealizedPnLPercent < 0">
+                        {{ pos.unrealizedPnLPercent >= 0 ? '+' : '' }}{{ pos.unrealizedPnLPercent | number:'1.2-2' }}%
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Order Entry -->
+        <div class="sidebar-column">
+          <!-- Order Entry Card -->
+          <div class="card order-card">
+            <div class="card-header">
+              <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <line x1="12" y1="1" x2="12" y2="23"></line>
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                New Order
+              </h2>
+            </div>
+            <div class="card-body">
+              <!-- Quick Symbol Selection -->
+              <div class="quick-symbols">
+                <button *ngFor="let sym of quickSymbols" 
+                        class="symbol-chip"
+                        [class.active]="newOrder.symbol === sym"
+                        (click)="selectSymbol(sym)">
+                  {{ sym }}
+                </button>
+              </div>
+
+              <!-- Side Toggle -->
+              <div class="side-toggle">
+                <button class="side-btn buy" [class.active]="newOrder.side === '1'" (click)="newOrder.side = '1'">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                  </svg>
+                  BUY
+                </button>
+                <button class="side-btn sell" [class.active]="newOrder.side === '2'" (click)="newOrder.side = '2'">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                    <polyline points="17 18 23 18 23 12"></polyline>
+                  </svg>
+                  SELL
+                </button>
+              </div>
+
+              <!-- Order Form -->
+              <div class="order-form">
+                <div class="form-group">
+                  <label>Symbol</label>
+                  <select [(ngModel)]="newOrder.symbol" class="input">
+                    <option *ngFor="let sym of allSymbols" [value]="sym">{{ sym }}</option>
+                  </select>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Quantity</label>
+                    <input type="number" [(ngModel)]="newOrder.quantity" class="input" min="1">
+                  </div>
+                  <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" [(ngModel)]="newOrder.price" class="input" step="0.01" min="0.01">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Type</label>
+                    <select [(ngModel)]="newOrder.orderType" class="input">
+                      <option value="LIMIT">Limit</option>
+                      <option value="MARKET">Market</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>TIF</label>
+                    <select [(ngModel)]="newOrder.timeInForce" class="input">
+                      <option value="DAY">Day</option>
+                      <option value="GTC">GTC</option>
+                      <option value="IOC">IOC</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="order-summary">
+                  <div class="summary-row">
+                    <span class="label">Side</span>
+                    <span class="value" [class.buy-text]="newOrder.side === '1'" [class.sell-text]="newOrder.side === '2'">
+                      {{ newOrder.side === '1' ? 'BUY' : 'SELL' }}
+                    </span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="label">Quantity</span>
+                    <span class="value">{{ newOrder.quantity | number }}</span>
+                  </div>
+                  <div class="summary-row total">
+                    <span class="label">Est. Value</span>
+                    <span class="value">${{ (newOrder.quantity * newOrder.price) | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button class="btn-submit" 
+                        [class.buy]="newOrder.side === '1'" 
+                        [class.sell]="newOrder.side === '2'"
+                        (click)="submitOrder()"
+                        [disabled]="!sessionInfo?.isConnected">
+                  <span *ngIf="newOrder.side === '1'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    </svg>
+                    Buy {{ newOrder.symbol }}
+                  </span>
+                  <span *ngIf="newOrder.side === '2'">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                      <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
+                    </svg>
+                    Sell {{ newOrder.symbol }}
+                  </span>
+                </button>
+
+                <p class="connect-hint" *ngIf="!sessionInfo?.isConnected">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  Connect to exchange to submit orders
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Movers Card -->
+          <div class="card movers-card">
+            <div class="card-header">
+              <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                Top Movers
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="movers-section">
+                <h4 class="movers-title positive">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <path d="M12 4l8 8h-6v8h-4v-8H4z"/>
+                  </svg>
+                  Gainers
+                </h4>
+                <div class="mover-item" *ngFor="let mover of topGainers">
+                  <span class="mover-symbol">{{ mover.symbol }}</span>
+                  <span class="mover-price">${{ mover.price | number:'1.2-2' }}</span>
+                  <span class="mover-change positive">+{{ mover.change | number:'1.2-2' }}%</span>
+                </div>
+              </div>
+              <div class="movers-section">
+                <h4 class="movers-title negative">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+                    <path d="M12 20l-8-8h6V4h4v8h6z"/>
+                  </svg>
+                  Losers
+                </h4>
+                <div class="mover-item" *ngFor="let mover of topLosers">
+                  <span class="mover-symbol">{{ mover.symbol }}</span>
+                  <span class="mover-price">${{ mover.price | number:'1.2-2' }}</span>
+                  <span class="mover-change negative">{{ mover.change | number:'1.2-2' }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- News Card -->
+          <div class="card news-card">
+            <div class="card-header">
+              <h2>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                  <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path>
+                </svg>
+                Market News
+              </h2>
+            </div>
+            <div class="card-body">
+              <div class="news-list">
+                <div class="news-item" *ngFor="let news of liveNews.slice(0, 5)">
+                  <div class="news-header">
+                    <span class="news-source">{{ news.source }}</span>
+                    <span class="news-sentiment" [class]="news.sentiment">{{ news.sentiment }}</span>
+                  </div>
+                  <p class="news-headline">{{ news.headline }}</p>
+                  <div class="news-symbols">
+                    <span class="news-symbol" *ngFor="let sym of news.related">{{ sym }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer glass">
+    <div class="footer-left">
+      <span class="footer-brand">TradePro Trading Platform</span>
+      <span class="footer-version">v2.0</span>
+    </div>
+    <div class="footer-center">
+      <span class="footer-protocol">FIX 4.4</span>
+      <span class="footer-separator">•</span>
+      <span class="footer-target">Target: localhost:9876</span>
+    </div>
+    <div class="footer-right">
+      <span class="footer-time">{{ currentTime | date:'HH:mm:ss' }}</span>
+    </div>
+  </footer>
+</div>

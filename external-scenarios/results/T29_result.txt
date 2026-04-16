@@ -1,0 +1,43 @@
+: Adding FIX 4.0 protocol
+: Adding FIX 4.1 protocol
+: Adding FIX 4.2 protocol
+: Adding FIX 4.3 protocol
+: Adding FIX 4.4 protocol
+: Bulding FIX 4.4 help
+: Pipe (batch/log) interface active at \\.\pipe\minifix
+: (C)2009-2013 Björn Ahlqvist, available free of charge from http://elato.se/minifix/
+: Welcome to Mini-FIX 1.5.25!
+: Pipe interface connected
+: Pipe interface disconnected (code 109)
+: Pipe interface connected
+: Batch Session sequence numbers reset
+: SenderCompId set to MINIFIX
+: TargetCompId set to EXCHANGE
+: Batch Connect 127.0.0.1:9876
+: Pipe interface disconnected (code 109)
+: Connect to 127.0.0.1, resolving..
+: IP address 127.0.0.1 port 9876, connecting..
+: Connected to 127.0.0.1:9876 at 20260416-01:49:46 UTC
+< 8=FIX.4.2|9=66|35=A|49=MINIFIX|56=EXCHANGE|34=1|52=20260416-01:49:46|98=0|108=30|10=150|
+> 8=FIX.4.2|9=70|35=A|34=1|49=EXCHANGE|52=20260416-01:49:46.482|56=MINIFIX|98=0|108=30|10=093|
+: <done waiting, message matches>
+< 8=FIX.4.2|9=134|35=D|49=MINIFIX|56=EXCHANGE|34=1|52=20260416-01:49:46|11=1846381546|21=1|55=AAPL|54=1|60=20260416-01:49:46|40=2|44=150.00|38=100|59=0|10=144|
+> 8=FIX.4.2|9=220|35=8|34=2|49=EXCHANGE|52=20260416-01:49:46.497|56=MINIFIX|6=0|11=1846381546|14=0|17=EXEC-1776303563311|31=0|32=0|37=20260416-071946-612811|38=100|39=0|40=2|44=150|54=1|55=AAPL|59=0|60=20260416-07:19:46.497|150=0|151=100|10=195|
+< 8=FIX.4.2|9=133|35=D|49=MINIFIX|56=EXCHANGE|34=2|52=20260416-01:49:46|11=1846381548|21=1|55=MSFT|54=2|60=20260416-01:49:46|40=2|44=300.00|38=50|59=0|10=128|
+> 8=FIX.4.2|9=218|35=8|34=3|49=EXCHANGE|52=20260416-01:49:46.806|56=MINIFIX|6=0|11=1846381548|14=0|17=EXEC-1776303563312|31=0|32=0|37=20260416-071946-612812|38=50|39=0|40=2|44=300|54=2|55=MSFT|59=0|60=20260416-07:19:46.806|150=0|151=50|10=133|
+: Batch Disconnect
+: Batch Session sequence numbers reset
+: SenderCompId set to MINIFIX
+: TargetCompId set to EXCHANGE
+: Batch Connect 127.0.0.1:9876
+: Connection closed by local peer
+: Connect to 127.0.0.1, resolving..
+: IP address 127.0.0.1 port 9876, connecting..
+: Connected to 127.0.0.1:9876 at 20260416-01:49:49 UTC
+< 8=FIX.4.2|9=66|35=A|49=MINIFIX|56=EXCHANGE|34=2|52=20260416-01:49:49|98=0|108=30|10=154|
+> 8=FIX.4.2|9=70|35=A|34=1|49=EXCHANGE|52=20260416-01:49:49.490|56=MINIFIX|98=0|108=30|10=095|
+: <done waiting, message matches>
+< 8=FIX.4.2|9=134|35=D|49=MINIFIX|56=EXCHANGE|34=2|52=20260416-01:49:49|11=1846381550|21=1|55=ORCL|54=1|60=20260416-01:49:49|40=2|44=140.00|38=200|59=0|10=164|
+> 8=FIX.4.2|9=220|35=8|34=2|49=EXCHANGE|52=20260416-01:49:49.512|56=MINIFIX|6=0|11=1846381550|14=0|17=EXEC-1776303563313|31=0|32=0|37=20260416-071949-612813|38=200|39=0|40=2|44=140|54=1|55=ORCL|59=0|60=20260416-07:19:49.512|150=0|151=200|10=198|
+: T29 PASSED - Session continues correctly after sequence number reset
+: Batch Save to C:\Users\Aarav\OneDrive\Desktop\cmltest\fix-trading-simulator\external-scenarios\results\T29_result.txt

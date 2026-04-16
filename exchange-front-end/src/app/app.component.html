@@ -1,0 +1,1491 @@
+<!-- Watermark: Aarav Joshi -->
+<div class="exchange-app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Exchange</span>
+        <span class="brand-tag">Professional</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a class="nav-item" [class.active]="currentView === 'dashboard'" (click)="currentView = 'dashboard'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="9"/>
+          <rect x="14" y="3" width="7" height="5"/>
+          <rect x="14" y="12" width="7" height="9"/>
+          <rect x="3" y="16" width="7" height="5"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'orders'" (click)="currentView = 'orders'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+        </svg>
+        <span>Orders</span>
+        <span class="nav-badge">{{ orders.length }}</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'markets'" (click)="currentView = 'markets'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="20" x2="12" y2="10"/>
+          <line x1="18" y1="20" x2="18" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="16"/>
+        </svg>
+        <span>Markets</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'analytics'" (click)="currentView = 'analytics'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        <span>Analytics</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'news'" (click)="currentView = 'news'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2"/>
+          <rect x="6" y="8" width="8" height="5"/>
+          <path d="M6 15h8"/>
+          <path d="M6 18h5"/>
+          <circle cx="19" cy="8" r="3"/>
+        </svg>
+        <span>News</span>
+        <span class="nav-badge live">LIVE</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'watchlist'" (click)="currentView = 'watchlist'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span>Watchlist</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'currencies'" (click)="currentView = 'currencies'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        <span>Currencies</span>
+        <span class="nav-badge forex">FX</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'export'" (click)="currentView = 'export'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span>Export Data</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'commodities'" (click)="currentView = 'commodities'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <span>Commodities</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'metals'" (click)="currentView = 'metals'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <span>Precious Metals</span>
+      </a>
+      <a class="nav-item" [class.active]="currentView === 'settings'" (click)="currentView = 'settings'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <div class="connection-status" [class.connected]="sessionStatus?.connected">
+        <span class="status-dot"></span>
+        <span class="status-text">{{ sessionStatus?.connected ? 'FIX Connected' : 'Disconnected' }}</span>
+      </div>
+      <div class="session-id" *ngIf="sessionStatus?.sessionId">
+        {{ sessionStatus?.sessionId }}
+      </div>
+    </div>
+  </aside>
+  
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <h1>Exchange Dashboard</h1>
+        <div class="market-status">
+          <span class="status-dot open"></span>
+          <span>Market Open</span>
+        </div>
+      </div>
+      
+      <div class="header-center">
+        <div class="quick-stats">
+          <div class="quick-stat">
+            <span class="stat-label">Orders</span>
+            <span class="stat-value">{{ orders.length }}</span>
+          </div>
+          <div class="quick-stat">
+            <span class="stat-label">Filled</span>
+            <span class="stat-value positive">{{ getFilledCount() }}</span>
+          </div>
+          <div class="quick-stat">
+            <span class="stat-label">Fill Rate</span>
+            <span class="stat-value">{{ getFillRate() | number:'1.0-0' }}%</span>
+          </div>
+          <div class="quick-stat">
+            <span class="stat-label">Latency</span>
+            <span class="stat-value">{{ getAvgLatency() }}ms</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <div class="header-time">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          {{ currentTime | date:'HH:mm:ss' }}
+        </div>
+        <div class="system-health" [class.healthy]="systemHealth.healthy">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          <span>{{ systemHealth.healthy ? 'Healthy' : 'Issues' }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard View -->
+    <ng-container *ngIf="currentView === 'dashboard'">
+    <!-- Stats Cards Row -->
+    <div class="stats-row">
+      <div class="stat-card portfolio">
+        <div class="stat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Portfolio Value</span>
+          <span class="stat-value">${{ totalPortfolioValue | number:'1.2-2' }}</span>
+        </div>
+        <div class="stat-trend positive">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+          +2.4%
+        </div>
+      </div>
+      
+      <div class="stat-card pnl">
+        <div class="stat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Unrealized P&L</span>
+          <span class="stat-value" [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">
+            {{ totalUnrealizedPnL >= 0 ? '+' : '' }}${{ totalUnrealizedPnL | number:'1.2-2' }}
+          </span>
+        </div>
+        <div class="stat-trend" [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">
+          {{ totalUnrealizedPnL >= 0 ? '▲' : '▼' }} {{ Math.abs(totalUnrealizedPnL / (totalPortfolioValue || 1) * 100) | number:'1.1-1' }}%
+        </div>
+      </div>
+      
+      <div class="stat-card volume">
+        <div class="stat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total Volume</span>
+          <span class="stat-value">{{ getTotalVolume() | number:'1.0-0' }}</span>
+        </div>
+        <div class="stat-trend positive">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          </svg>
+          +18%
+        </div>
+      </div>
+      
+      <div class="stat-card positions">
+        <div class="stat-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Positions</span>
+          <span class="stat-value">{{ positions.length }}</span>
+        </div>
+        <div class="stat-sub">{{ getOpenCount() }} open orders</div>
+      </div>
+    </div>
+    
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+      <!-- Left Column - Charts and Order Book -->
+      <div class="left-column">
+        <!-- Price Chart -->
+        <app-price-chart 
+          [symbol]="selectedOrderBookSymbol"
+          [spotPrice]="getSelectedStock()?.price || 0"
+          [spotChangePercent]="getSelectedStock()?.changePercent || 0"
+          [spotVolume]="getSelectedStock()?.volume || 0"
+          class="chart-section">
+        </app-price-chart>
+        
+        <!-- Order Form & Order Book Row -->
+        <div class="order-row">
+          <!-- Order Entry Form -->
+          <div class="order-form-card">
+            <div class="card-header">
+              <h3>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                New Order
+              </h3>
+            </div>
+            
+            <div class="selected-stock" *ngIf="getSelectedStock()">
+              <span class="stock-symbol">{{ getSelectedStock()?.symbol }}</span>
+              <span class="stock-price">${{ getSelectedStock()?.price | number:'1.2-2' }}</span>
+              <span class="stock-spread">
+                Bid: ${{ getSelectedStock()?.bid | number:'1.2-2' }} / Ask: ${{ getSelectedStock()?.ask | number:'1.2-2' }}
+              </span>
+            </div>
+            
+            <div class="side-toggle">
+              <button [class.active]="newOrder.side === '1'" [class.buy]="newOrder.side === '1'" (click)="newOrder.side = '1'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                </svg>
+                BUY
+              </button>
+              <button [class.active]="newOrder.side === '2'" [class.sell]="newOrder.side === '2'" (click)="newOrder.side = '2'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+                </svg>
+                SELL
+              </button>
+            </div>
+            
+            <div class="form-fields">
+              <div class="form-group">
+                <label>Symbol</label>
+                <select [(ngModel)]="newOrder.symbol" (change)="onSymbolChange()">
+                  <optgroup *ngFor="let cat of stockCategories" [label]="cat.name">
+                    <option *ngFor="let stock of cat.stocks" [value]="stock.symbol">{{ stock.symbol }} - {{ stock.name }}</option>
+                  </optgroup>
+                </select>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Quantity</label>
+                  <input type="number" [(ngModel)]="newOrder.quantity" min="1" placeholder="100">
+                </div>
+                <div class="form-group">
+                  <label>Price</label>
+                  <div class="price-input">
+                    <span>$</span>
+                    <input type="number" [(ngModel)]="newOrder.price" step="0.01" min="0.01" placeholder="0.00">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Type</label>
+                  <select [(ngModel)]="newOrder.orderType">
+                    <option value="LIMIT">Limit</option>
+                    <option value="MARKET">Market</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>TIF</label>
+                  <select [(ngModel)]="newOrder.timeInForce">
+                    <option value="DAY">Day</option>
+                    <option value="GTC">GTC</option>
+                    <option value="IOC">IOC</option>
+                    <option value="FOK">FOK</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="order-summary">
+              <div class="summary-row">
+                <span>Est. Total</span>
+                <span class="summary-value">${{ (newOrder.quantity * newOrder.price) | number:'1.2-2' }}</span>
+              </div>
+            </div>
+            
+            <button class="btn-submit" 
+                    [class.buy]="newOrder.side === '1'" 
+                    [class.sell]="newOrder.side === '2'"
+                    (click)="submitOrder()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 2L11 13"/>
+                <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
+              </svg>
+              {{ newOrder.side === '1' ? 'Submit Buy Order' : 'Submit Sell Order' }}
+            </button>
+          </div>
+        </div>
+        
+        <!-- Order Book - Full Width -->
+        <div class="order-book-wrapper">
+          <app-order-book 
+            [symbol]="selectedOrderBookSymbol"
+            class="order-book-section">
+          </app-order-book>
+        </div>
+        
+        <!-- Orders Table -->
+        <div class="orders-card">
+          <div class="card-header">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Order Book
+            </h3>
+            <div class="card-actions">
+              <button class="btn-icon" (click)="refreshOrders()" title="Refresh">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <polyline points="1 20 1 14 7 14"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="orders-controls">
+            <div class="orders-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="text"
+                [(ngModel)]="orderSearchQuery"
+                placeholder="Search by symbol, order ID, side or status"
+              >
+            </div>
+
+            <div class="orders-filter-group">
+              <select [(ngModel)]="orderStatusFilter">
+                <option *ngFor="let status of orderStatusOptions" [value]="status">{{ status }}</option>
+              </select>
+              <button class="btn-clear-filters" (click)="toggleFixResponseControls()">
+                {{ showFixResponseControls ? 'Hide FIX Actions' : 'Show FIX Actions' }}
+              </button>
+              <button class="btn-clear-filters" (click)="clearOrderFilters()">Reset</button>
+            </div>
+
+            <div class="orders-count">
+              Showing {{ filteredOrders.length }} / {{ orders.length }}
+            </div>
+          </div>
+          
+          <div class="alert error" *ngIf="error">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ error }}
+          </div>
+          
+          <div class="alert success" *ngIf="success">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            {{ success }}
+          </div>
+          
+          <div class="loading" *ngIf="loading">
+            <div class="spinner"></div>
+            <span>Loading orders...</span>
+          </div>
+          
+          <div class="orders-table-wrapper" *ngIf="!loading">
+            <table class="orders-table" *ngIf="filteredOrders.length > 0">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Symbol</th>
+                  <th>Side</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Filled</th>
+                  <th *ngIf="showFixResponseControls">FIX Response</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let order of filteredOrders; trackBy: trackByOrderId" class="order-row">
+                  <td class="cell-id">{{ order.orderRefNumber || order.clOrdId }}</td>
+                  <td class="cell-symbol">
+                    <span class="symbol-badge">{{ order.symbol }}</span>
+                  </td>
+                  <td class="cell-side">
+                    <span class="side-badge" [class]="getSideClass(order.side)">
+                      {{ getSideLabel(order.side) }}
+                    </span>
+                  </td>
+                  <td class="cell-qty">{{ order.quantity | number }}</td>
+                  <td class="cell-price">${{ order.price | number:'1.2-2' }}</td>
+                  <td class="cell-type">{{ order.orderType || 'LIMIT' }}</td>
+                  <td class="cell-status">
+                    <span class="status-badge" [class]="getStatusClass(order.status)">
+                      {{ order.status }}
+                    </span>
+                  </td>
+                  <td class="cell-filled">{{ order.filledQty || 0 }}/{{ order.quantity }}</td>
+                  <td class="cell-response" *ngIf="showFixResponseControls">
+                    <div class="response-actions">
+                      <button
+                        class="btn-response"
+                        title="Send ACK"
+                        (click)="sendOrderResponse(order, 'ACK')"
+                        [disabled]="isOrderResponseSending(order, 'ACK')">
+                        ACK
+                      </button>
+                      <button
+                        class="btn-response"
+                        title="Send STATUS"
+                        (click)="sendOrderResponse(order, 'STATUS')"
+                        [disabled]="isOrderResponseSending(order, 'STATUS')">
+                        STS
+                      </button>
+                      <button
+                        class="btn-response"
+                        title="Send CANCEL"
+                        (click)="sendOrderResponse(order, 'CANCEL')"
+                        [disabled]="isOrderResponseSending(order, 'CANCEL')">
+                        CXL
+                      </button>
+                      <button
+                        class="btn-response danger"
+                        title="Send REJECT"
+                        (click)="sendOrderResponse(order, 'REJECT')"
+                        [disabled]="isOrderResponseSending(order, 'REJECT')">
+                        REJ
+                      </button>
+                    </div>
+                  </td>
+                  <td class="cell-time">{{ order.createdAt | date:'HH:mm:ss' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div class="empty-state" *ngIf="filteredOrders.length === 0">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <h4>{{ orders.length === 0 ? 'No Orders Yet' : 'No Matching Orders' }}</h4>
+              <p>{{ orders.length === 0 ? 'Submit an order or wait for FIX messages from Broker' : 'Try clearing search or status filters' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Column - Market Data & Activity -->
+      <div class="right-column">
+        <!-- Trade Blotter -->
+        <app-trade-blotter 
+          [symbol]="selectedOrderBookSymbol">
+        </app-trade-blotter>
+        
+        <!-- Market Heatmap -->
+        <app-market-heatmap 
+          (stockSelect)="onHeatmapStockSelect($event)">
+        </app-market-heatmap>
+
+        <!-- All Stocks: Theoretical Options Value -->
+        <div class="all-options-card">
+          <div class="card-header">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19h16"/>
+                <path d="M4 15l4-4 3 3 5-6 4 4"/>
+              </svg>
+              Theoretical Options (All Stocks)
+            </h3>
+            <div class="options-header-actions">
+              <span class="lab-tag">{{ filteredOptionsSnapshots.length }} / {{ allOptionsSnapshots.length }}</span>
+              <button class="btn-icon" (click)="refreshAllOptionsPricing()" title="Refresh options pricing">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"></polyline>
+                  <polyline points="1 20 1 14 7 14"></polyline>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="options-controls">
+            <input
+              id="optionsSearchInput"
+              type="text"
+              [ngModel]="optionsSearchQuery"
+              (ngModelChange)="onOptionsSearchQueryChange($event)"
+              placeholder="Search symbol/name"
+            >
+
+            <select [(ngModel)]="optionsSectorFilter" (ngModelChange)="onOptionsBoardFiltersChanged()">
+              <option *ngFor="let sector of optionsSectorFilters" [value]="sector">{{ sector }}</option>
+            </select>
+
+            <select [(ngModel)]="optionsSortKey" (ngModelChange)="onOptionsBoardFiltersChanged()">
+              <option value="callDesc">Sort: Call ↓</option>
+              <option value="putDesc">Sort: Put ↓</option>
+              <option value="deltaDesc">Sort: Delta ↓</option>
+              <option value="symbol">Sort: Symbol A-Z</option>
+            </select>
+
+            <button class="btn-clear-filters" (click)="toggleOptionsCompactMode()">
+              {{ optionsCompactMode ? 'Comfortable' : 'Compact' }}
+            </button>
+
+            <button class="btn-clear-filters" (click)="clearOptionsFilters()">Reset</button>
+          </div>
+
+          <div class="options-safety-row">
+            <label class="options-inline-toggle" for="optionsQuickTradeConfirmToggle">
+              <input
+                id="optionsQuickTradeConfirmToggle"
+                type="checkbox"
+                [ngModel]="optionsRequireQuickTradeConfirm"
+                (ngModelChange)="toggleQuickTradeConfirm()"
+              >
+              Confirm Buy/Sell quick actions
+            </label>
+            <span class="options-shortcuts-hint">Shortcuts: Alt+R refresh, Alt+C compact, Alt+N/P page, Ctrl+Shift+F focus search, / quick focus</span>
+          </div>
+
+          <div class="options-assumptions">
+            <div class="assumption-field">
+              <label for="optionsDaysInput">Days</label>
+              <input id="optionsDaysInput" type="number" min="1" max="3650" [(ngModel)]="optionsAssumptions.daysToExpiry">
+            </div>
+            <div class="assumption-field">
+              <label for="optionsRateInput">r (%)</label>
+              <input id="optionsRateInput" type="number" step="0.1" min="0" max="50" [(ngModel)]="optionsAssumptions.riskFreeRatePct">
+            </div>
+            <div class="assumption-field">
+              <label for="optionsVolInput">σ (%)</label>
+              <input id="optionsVolInput" type="number" step="0.1" min="1" max="400" [(ngModel)]="optionsAssumptions.volatilityPct">
+            </div>
+            <button class="btn-apply-options" (click)="refreshAllOptionsPricing()">Apply Pricing Inputs</button>
+          </div>
+
+          <div class="options-status" *ngIf="optionsBoardLoading">Loading options pricing...</div>
+          <div class="options-status error" *ngIf="optionsBoardError">{{ optionsBoardError }}</div>
+
+          <div class="options-table-wrap">
+            <table class="options-table" [class.compact]="optionsCompactMode">
+              <thead>
+                <tr>
+                  <th class="sticky-left">Symbol</th>
+                  <th>Spot</th>
+                  <th>Strike</th>
+                  <th>Call</th>
+                  <th>Put</th>
+                  <th>Δ(Call)</th>
+                  <th class="sticky-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let opt of pagedOptionsSnapshots; trackBy: trackByOptionSymbol">
+                  <td class="symbol sticky-left">{{ opt.symbol }}</td>
+                  <td>${{ opt.spot | number:'1.2-2' }}</td>
+                  <td>${{ opt.strike | number:'1.0-2' }}</td>
+                  <td class="price">${{ opt.call.theoreticalPrice | number:'1.2-2' }}</td>
+                  <td class="price">${{ opt.put.theoreticalPrice | number:'1.2-2' }}</td>
+                  <td>{{ opt.call.greeks.delta | number:'1.3-3' }}</td>
+                  <td class="sticky-right">
+                    <div class="options-actions">
+                      <button type="button" class="btn-response" (click)="focusOptionSymbol(opt.symbol)">View</button>
+                      <button type="button" class="btn-response" (click)="quickOptionTrade(opt.symbol, '1', opt.spot)">Buy</button>
+                      <button type="button" class="btn-response danger" (click)="quickOptionTrade(opt.symbol, '2', opt.spot)">Sell</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="!optionsBoardLoading && filteredOptionsSnapshots.length === 0">
+                  <td colspan="7" class="options-empty">No symbols match current filters.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="options-pagination" *ngIf="filteredOptionsSnapshots.length > 0">
+            <button class="btn-response" [disabled]="optionsPage <= 1" (click)="prevOptionsPage()">Prev</button>
+            <span>Page {{ optionsPage }} / {{ totalOptionsPages }}</span>
+            <button class="btn-response" [disabled]="optionsPage >= totalOptionsPages" (click)="nextOptionsPage()">Next</button>
+          </div>
+        </div>
+        
+        <!-- Activity Feed -->
+        <app-activity-feed [orders]="orders"></app-activity-feed>
+
+        <!-- Session Events -->
+        <div class="session-events-card">
+          <div class="card-header">
+            <h3>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              FIX Session Events
+            </h3>
+            <div class="card-actions">
+              <button class="btn-icon" (click)="loadSessionEvents(sessionEventsLimit)" title="Refresh Events">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <polyline points="1 20 1 14 7 14"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="session-events-toolbar">
+            <div class="session-events-filter-group">
+              <button class="session-filter-btn" [class.active]="sessionEventFilter === 'ALL'" (click)="sessionEventFilter = 'ALL'">All</button>
+              <button class="session-filter-btn" [class.active]="sessionEventFilter === 'ERRORS'" (click)="sessionEventFilter = 'ERRORS'">Errors</button>
+              <button class="session-filter-btn" [class.active]="sessionEventFilter === 'ORDERS'" (click)="sessionEventFilter = 'ORDERS'">Orders</button>
+              <button class="session-filter-btn" [class.active]="sessionEventFilter === 'SESSION'" (click)="sessionEventFilter = 'SESSION'">Session</button>
+            </div>
+
+            <div class="session-events-tools">
+              <select [(ngModel)]="sessionEventsLimit" (ngModelChange)="loadSessionEvents(sessionEventsLimit)">
+                <option *ngFor="let limit of sessionEventLimits" [ngValue]="limit">{{ limit }} events</option>
+              </select>
+
+              <label class="session-live-toggle">
+                <input type="checkbox" [(ngModel)]="sessionEventsLive">
+                <span>Live</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="session-events-list" *ngIf="!sessionEventsLoading && filteredSessionEvents.length > 0">
+            <div class="session-event-row" *ngFor="let event of filteredSessionEvents">
+              <div class="session-event-top">
+                <span [class]="getSessionEventClass(event.type)">{{ event.type }}</span>
+                <span class="session-event-time">{{ event.timestamp | date:'HH:mm:ss' }}</span>
+              </div>
+              <div class="session-event-message">{{ event.message }}</div>
+            </div>
+          </div>
+
+          <div class="session-events-empty" *ngIf="sessionEventsLoading">
+            Loading session events...
+          </div>
+
+          <div class="session-events-empty" *ngIf="!sessionEventsLoading && filteredSessionEvents.length === 0">
+            {{ sessionEvents.length === 0 ? 'No session events yet' : 'No events match the selected filter' }}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Commodities & Precious Metals Section -->
+    <div class="commodities-section">
+      <div class="section-header">
+        <h2>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          Commodities & Precious Metals Trading
+        </h2>
+        <span class="section-badge">NEW</span>
+      </div>
+      
+      <div class="commodities-grid">
+        <!-- Commodities Trading Panel -->
+        <app-commodities-trading></app-commodities-trading>
+        
+        <!-- Precious Metals Panel -->
+        <app-precious-metals></app-precious-metals>
+      </div>
+    </div>
+    </ng-container>
+
+    <!-- Orders View -->
+    <ng-container *ngIf="currentView === 'orders'">
+      <div class="view-container orders-view">
+        <div class="view-header">
+          <h2>Order Management</h2>
+          <p>View and manage all your orders</p>
+        </div>
+        <div class="orders-full">
+          <div class="card-header">
+            <h3>All Orders</h3>
+            <button class="btn-refresh" (click)="refreshOrders()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+
+          <div class="orders-controls">
+            <div class="orders-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="text"
+                [(ngModel)]="orderSearchQuery"
+                placeholder="Search by symbol, order ID, side or status"
+              >
+            </div>
+
+            <div class="orders-filter-group">
+              <select [(ngModel)]="orderStatusFilter">
+                <option *ngFor="let status of orderStatusOptions" [value]="status">{{ status }}</option>
+              </select>
+              <button class="btn-clear-filters" (click)="toggleFixResponseControls()">
+                {{ showFixResponseControls ? 'Hide FIX Actions' : 'Show FIX Actions' }}
+              </button>
+              <button class="btn-clear-filters" (click)="clearOrderFilters()">Reset</button>
+            </div>
+
+            <div class="orders-count">
+              Showing {{ filteredOrders.length }} / {{ orders.length }}
+            </div>
+          </div>
+
+          <div class="orders-table-wrapper">
+            <table class="orders-table" *ngIf="filteredOrders.length > 0">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Symbol</th>
+                  <th>Side</th>
+                  <th>Qty</th>
+                  <th>Price</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Filled</th>
+                  <th *ngIf="showFixResponseControls">FIX Response</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let order of filteredOrders">
+                  <td>{{ order.orderRefNumber || order.clOrdId }}</td>
+                  <td><span class="symbol-badge">{{ order.symbol }}</span></td>
+                  <td><span class="side-badge" [class]="getSideClass(order.side)">{{ getSideLabel(order.side) }}</span></td>
+                  <td>{{ order.quantity | number }}</td>
+                  <td>\${{ order.price | number:'1.2-2' }}</td>
+                  <td>{{ order.orderType || 'LIMIT' }}</td>
+                  <td><span class="status-badge" [class]="getStatusClass(order.status)">{{ order.status }}</span></td>
+                  <td>{{ order.filledQty || 0 }}/{{ order.quantity }}</td>
+                  <td class="cell-response" *ngIf="showFixResponseControls">
+                    <div class="response-actions">
+                      <button
+                        class="btn-response"
+                        title="Send ACK"
+                        (click)="sendOrderResponse(order, 'ACK')"
+                        [disabled]="isOrderResponseSending(order, 'ACK')">
+                        ACK
+                      </button>
+                      <button
+                        class="btn-response"
+                        title="Send STATUS"
+                        (click)="sendOrderResponse(order, 'STATUS')"
+                        [disabled]="isOrderResponseSending(order, 'STATUS')">
+                        STS
+                      </button>
+                      <button
+                        class="btn-response"
+                        title="Send CANCEL"
+                        (click)="sendOrderResponse(order, 'CANCEL')"
+                        [disabled]="isOrderResponseSending(order, 'CANCEL')">
+                        CXL
+                      </button>
+                      <button
+                        class="btn-response danger"
+                        title="Send REJECT"
+                        (click)="sendOrderResponse(order, 'REJECT')"
+                        [disabled]="isOrderResponseSending(order, 'REJECT')">
+                        REJ
+                      </button>
+                    </div>
+                  </td>
+                  <td>{{ order.createdAt | date:'HH:mm:ss' }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="empty-state" *ngIf="filteredOrders.length === 0">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <h4>{{ orders.length === 0 ? 'No Orders Yet' : 'No Matching Orders' }}</h4>
+              <p>{{ orders.length === 0 ? 'Submit an order from the Dashboard' : 'Try clearing search or status filters' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Markets View -->
+    <ng-container *ngIf="currentView === 'markets'">
+      <div class="view-container markets-view">
+        <div class="view-header">
+          <h2>Market Overview</h2>
+          <p>Real-time market data and analysis</p>
+        </div>
+        <app-market-heatmap (stockSelect)="onHeatmapStockSelect($event)"></app-market-heatmap>
+        <div class="market-grid">
+          <app-price-chart
+            [symbol]="selectedOrderBookSymbol"
+            [spotPrice]="getSelectedStock()?.price || 0"
+            [spotChangePercent]="getSelectedStock()?.changePercent || 0"
+            [spotVolume]="getSelectedStock()?.volume || 0"
+          ></app-price-chart>
+          <app-order-book [symbol]="selectedOrderBookSymbol"></app-order-book>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Analytics View -->
+    <ng-container *ngIf="currentView === 'analytics'">
+      <div class="view-container analytics-view">
+        <div class="view-header">
+          <h2>Analytics & Insights</h2>
+          <p>Trading performance and market analytics</p>
+        </div>
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <h3>Trading Statistics</h3>
+            <div class="stat-row"><span>Total Orders:</span><span>{{ orders.length }}</span></div>
+            <div class="stat-row"><span>Filled Orders:</span><span>{{ getFilledCount() }}</span></div>
+            <div class="stat-row"><span>Fill Rate:</span><span>{{ getFillRate() | number:'1.1-1' }}%</span></div>
+            <div class="stat-row"><span>Total Volume:</span><span>{{ getTotalVolume() | number }}</span></div>
+          </div>
+          <div class="analytics-card">
+            <h3>Portfolio Performance</h3>
+            <div class="stat-row"><span>Portfolio Value:</span><span>${{ totalPortfolioValue | number:'1.2-2' }}</span></div>
+            <div class="stat-row"><span>Unrealized P&L:</span><span [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">${{ totalUnrealizedPnL | number:'1.2-2' }}</span></div>
+            <div class="stat-row"><span>Positions:</span><span>{{ positions.length }}</span></div>
+          </div>
+          <app-trade-blotter [symbol]="selectedOrderBookSymbol"></app-trade-blotter>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- News View -->
+    <ng-container *ngIf="currentView === 'news'">
+      <div class="view-container news-view">
+        <div class="view-header">
+          <h2>Market News</h2>
+          <p>Real-time financial news and market updates</p>
+        </div>
+        
+        <!-- News Categories -->
+        <div class="news-categories">
+          <button *ngFor="let cat of newsCategories" 
+                  [class.active]="selectedNewsCategory === cat"
+                  (click)="selectedNewsCategory = cat">
+            {{ cat }}
+          </button>
+        </div>
+        
+        <div class="news-grid">
+          <!-- Main News Feed -->
+          <div class="news-feed">
+            <div *ngFor="let news of getFilteredNews()" 
+                 class="news-card"
+                 [class.breaking]="news.isBreaking"
+                 [class.high-impact]="news.impact === 'high'">
+              <div class="news-header">
+                <span class="news-source">{{ news.source }}</span>
+                <span class="news-time">{{ getNewsAge(news.timestamp) }}</span>
+                <span *ngIf="news.isBreaking" class="breaking-badge">BREAKING</span>
+              </div>
+              <h3 class="news-title">{{ news.title }}</h3>
+              <p class="news-summary">{{ news.summary }}</p>
+              <div class="news-footer">
+                <span *ngIf="news.symbol" class="news-symbol" (click)="newOrder.symbol = news.symbol; selectedOrderBookSymbol = news.symbol">
+                  {{ news.symbol }}
+                </span>
+                <span class="news-sentiment" [class]="news.sentiment">
+                  {{ news.sentiment === 'positive' ? '▲ Bullish' : news.sentiment === 'negative' ? '▼ Bearish' : '● Neutral' }}
+                </span>
+                <span class="news-impact" [class]="news.impact">{{ news.impact | uppercase }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- News Sidebar -->
+          <div class="news-sidebar">
+            <!-- Market Movers -->
+            <div class="sidebar-card">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                </svg>
+                Top Movers
+              </h4>
+              <div class="mover-list">
+                <div *ngFor="let stock of allStocks.slice(0, 5)" class="mover-item" (click)="newOrder.symbol = stock.symbol; selectedOrderBookSymbol = stock.symbol">
+                  <span class="mover-symbol">{{ stock.symbol }}</span>
+                  <span class="mover-price">${{ stock.price | number:'1.2-2' }}</span>
+                  <span class="mover-change" [class.positive]="stock.changePercent >= 0" [class.negative]="stock.changePercent < 0">
+                    {{ stock.changePercent >= 0 ? '+' : '' }}{{ stock.changePercent | number:'1.2-2' }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="sidebar-card">
+              <h4>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                Quick Actions
+              </h4>
+              <div class="quick-actions">
+                <button class="action-btn" (click)="currentView = 'dashboard'">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="9"/>
+                    <rect x="14" y="3" width="7" height="5"/>
+                  </svg>
+                  Dashboard
+                </button>
+                <button class="action-btn" (click)="currentView = 'orders'">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                  </svg>
+                  New Order
+                </button>
+                <button class="action-btn" (click)="currentView = 'watchlist'">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12" y2="16"/>
+                  </svg>
+                  Watchlist
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Watchlist View -->
+    <ng-container *ngIf="currentView === 'watchlist'">
+      <div class="view-container watchlist-view">
+        <div class="view-header">
+          <h2>My Watchlist</h2>
+          <p>Track your favorite stocks</p>
+        </div>
+        
+        <div class="watchlist-grid">
+          <!-- Watchlist Table -->
+          <div class="watchlist-table-card">
+            <table class="watchlist-table">
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Change</th>
+                  <th>Bid</th>
+                  <th>Ask</th>
+                  <th>Volume</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let stock of getWatchlistStocks()" (click)="newOrder.symbol = stock.symbol; selectedOrderBookSymbol = stock.symbol">
+                  <td class="symbol">{{ stock.symbol }}</td>
+                  <td class="name">{{ stock.name }}</td>
+                  <td class="price">${{ stock.price | number:'1.2-2' }}</td>
+                  <td class="change" [class.positive]="stock.changePercent >= 0" [class.negative]="stock.changePercent < 0">
+                    {{ stock.changePercent >= 0 ? '+' : '' }}{{ stock.changePercent | number:'1.2-2' }}%
+                  </td>
+                  <td class="bid">${{ stock.bid | number:'1.2-2' }}</td>
+                  <td class="ask">${{ stock.ask | number:'1.2-2' }}</td>
+                  <td class="volume">{{ stock.volume | number:'1.0-0' }}</td>
+                  <td class="actions">
+                    <button class="btn-trade buy" (click)="newOrder.symbol = stock.symbol; newOrder.side = '1'; currentView = 'dashboard'; $event.stopPropagation()">Buy</button>
+                    <button class="btn-trade sell" (click)="newOrder.symbol = stock.symbol; newOrder.side = '2'; currentView = 'dashboard'; $event.stopPropagation()">Sell</button>
+                    <button class="btn-remove" (click)="toggleWatchlist(stock.symbol); $event.stopPropagation()">✕</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div class="empty-watchlist" *ngIf="getWatchlistStocks().length === 0">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <p>Your watchlist is empty</p>
+              <span>Add stocks from the Markets view</span>
+            </div>
+          </div>
+          
+          <!-- Add to Watchlist -->
+          <div class="add-watchlist-card">
+            <h3>Add to Watchlist</h3>
+            <div class="stock-picker">
+              <select [(ngModel)]="newOrder.symbol">
+                <optgroup *ngFor="let cat of stockCategories" [label]="cat.name">
+                  <option *ngFor="let stock of cat.stocks" [value]="stock.symbol">{{ stock.symbol }} - {{ stock.name }}</option>
+                </optgroup>
+              </select>
+              <button (click)="toggleWatchlist(newOrder.symbol)" [disabled]="isInWatchlist(newOrder.symbol)">
+                {{ isInWatchlist(newOrder.symbol) ? 'Already Added' : 'Add to Watchlist' }}
+              </button>
+            </div>
+            
+            <!-- Popular Picks -->
+            <h4>Popular Picks</h4>
+            <div class="popular-picks">
+              <button *ngFor="let sym of ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'NVDA']"
+                      [class.added]="isInWatchlist(sym)"
+                      (click)="toggleWatchlist(sym)">
+                {{ sym }}
+                <span *ngIf="isInWatchlist(sym)">✓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Currency Market View -->
+    <ng-container *ngIf="currentView === 'currencies'">
+      <div class="view-container currencies-view">
+        <div class="view-header">
+          <div class="header-content">
+            <h2>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              Currency Market Monitor
+            </h2>
+            <p>Real-time forex rates and market diagnostics</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-export" (click)="exportData('currencies', 'csv')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+        
+        <!-- Category Tabs -->
+        <div class="currency-tabs">
+          <button *ngFor="let cat of currencyCategories"
+                  [class.active]="selectedCurrencyCategory === cat"
+                  (click)="selectedCurrencyCategory = cat">
+            {{ cat }} Pairs
+          </button>
+        </div>
+        
+        <div class="currencies-content">
+          <!-- Main Currency Grid -->
+          <div class="currency-grid">
+            <div class="currency-card" *ngFor="let pair of getFilteredCurrencyPairs()"
+                 [class.selected]="selectedCurrencyPair === pair.pair"
+                 (click)="selectedCurrencyPair = pair.pair">
+              <div class="currency-header">
+                <div class="currency-flags">
+                  <span class="flag">{{ pair.flag1 }}</span>
+                  <span class="flag">{{ pair.flag2 }}</span>
+                </div>
+                <span class="currency-pair">{{ pair.pair }}</span>
+              </div>
+              <div class="currency-rate">
+                {{ pair.rate | number:'1.4-5' }}
+              </div>
+              <div class="currency-change" [class.positive]="pair.changePercent >= 0" [class.negative]="pair.changePercent < 0">
+                {{ pair.changePercent >= 0 ? '+' : '' }}{{ pair.changePercent | number:'1.2-4' }}%
+                <svg *ngIf="pair.changePercent >= 0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="18 15 12 9 6 15"/>
+                </svg>
+                <svg *ngIf="pair.changePercent < 0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+              <div class="currency-spread">
+                Spread: {{ ((pair.ask - pair.bid) * 10000) | number:'1.1-1' }} pips
+              </div>
+            </div>
+          </div>
+          
+          <!-- Selected Currency Details -->
+          <div class="currency-details" *ngIf="getSelectedCurrency() as currency">
+            <div class="details-header">
+              <div class="details-title">
+                <span class="flags-large">{{ currency.flag1 }} {{ currency.flag2 }}</span>
+                <h3>{{ currency.pair }}</h3>
+              </div>
+              <div class="details-rate">
+                <span class="rate-value">{{ currency.rate | number:'1.5-5' }}</span>
+                <span class="rate-change" [class.positive]="currency.changePercent >= 0" [class.negative]="currency.changePercent < 0">
+                  {{ currency.changePercent >= 0 ? '▲' : '▼' }} {{ Math.abs(currency.changePercent) | number:'1.2-4' }}%
+                </span>
+              </div>
+            </div>
+            
+            <div class="details-grid">
+              <div class="detail-item">
+                <span class="label">Bid</span>
+                <span class="value">{{ currency.bid | number:'1.5-5' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Ask</span>
+                <span class="value">{{ currency.ask | number:'1.5-5' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">Spread</span>
+                <span class="value">{{ ((currency.ask - currency.bid) * 10000) | number:'1.1-1' }} pips</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">24h High</span>
+                <span class="value positive">{{ currency.high24h | number:'1.5-5' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">24h Low</span>
+                <span class="value negative">{{ currency.low24h | number:'1.5-5' }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">24h Volume</span>
+                <span class="value">{{ currency.volume | number:'1.0-0' }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Market Sentiment Panel -->
+          <div class="sentiment-panel">
+            <h3>Market Sentiment</h3>
+            <div class="fear-greed-meter">
+              <div class="meter-label">Fear & Greed Index</div>
+              <div class="meter-bar">
+                <div class="meter-fill" [style.width.%]="marketSentiment.fearGreedIndex" [style.background-color]="getFearGreedColor()"></div>
+              </div>
+              <div class="meter-value">
+                <span class="index-value">{{ marketSentiment.fearGreedIndex }}</span>
+                <span class="index-label">{{ getFearGreedLabel() }}</span>
+              </div>
+            </div>
+            <div class="sentiment-breakdown">
+              <div class="sentiment-item">
+                <span class="dot bullish"></span>
+                <span>Bullish</span>
+                <span class="percent">{{ marketSentiment.bullish }}%</span>
+              </div>
+              <div class="sentiment-item">
+                <span class="dot bearish"></span>
+                <span>Bearish</span>
+                <span class="percent">{{ marketSentiment.bearish }}%</span>
+              </div>
+              <div class="sentiment-item">
+                <span class="dot neutral"></span>
+                <span>Neutral</span>
+                <span class="percent">{{ marketSentiment.neutral }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Export Data View -->
+    <ng-container *ngIf="currentView === 'export'">
+      <div class="view-container export-view">
+        <div class="view-header">
+          <h2>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export Center
+          </h2>
+          <p>Download your trading data in various formats</p>
+        </div>
+        
+        <div class="export-content">
+          <!-- Export Cards -->
+          <div class="export-grid">
+            <!-- Orders Export -->
+            <div class="export-card">
+              <div class="export-icon orders">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                  <line x1="8" y1="10" x2="16" y2="10"/>
+                  <line x1="8" y1="14" x2="16" y2="14"/>
+                  <line x1="8" y1="18" x2="12" y2="18"/>
+                </svg>
+              </div>
+              <h3>Orders</h3>
+              <p>Export all your orders including status, prices, and timestamps</p>
+              <div class="export-meta">
+                <span class="record-count">{{ orders.length }} records</span>
+              </div>
+              <div class="export-buttons">
+                <button (click)="exportData('orders', 'csv')" class="btn-csv">
+                  <span>📄</span> CSV
+                </button>
+                <button (click)="exportData('orders', 'json')" class="btn-json">
+                  <span>📋</span> JSON
+                </button>
+              </div>
+            </div>
+            
+            <!-- Positions Export -->
+            <div class="export-card">
+              <div class="export-icon positions">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                  <line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+              </div>
+              <h3>Positions</h3>
+              <p>Export current positions with P&L and market values</p>
+              <div class="export-meta">
+                <span class="record-count">{{ positions.length }} positions</span>
+              </div>
+              <div class="export-buttons">
+                <button (click)="exportData('positions', 'csv')" class="btn-csv">
+                  <span>📄</span> CSV
+                </button>
+                <button (click)="exportData('positions', 'json')" class="btn-json">
+                  <span>📋</span> JSON
+                </button>
+              </div>
+            </div>
+            
+            <!-- Executions Export -->
+            <div class="export-card">
+              <div class="export-icon executions">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+              </div>
+              <h3>Trade Executions</h3>
+              <p>Export trade history with execution details</p>
+              <div class="export-meta">
+                <span class="record-count">{{ executions.length }} trades</span>
+              </div>
+              <div class="export-buttons">
+                <button (click)="exportData('executions', 'csv')" class="btn-csv">
+                  <span>📄</span> CSV
+                </button>
+                <button (click)="exportData('executions', 'json')" class="btn-json">
+                  <span>📋</span> JSON
+                </button>
+              </div>
+            </div>
+            
+            <!-- Watchlist Export -->
+            <div class="export-card">
+              <div class="export-icon watchlist">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </div>
+              <h3>Watchlist</h3>
+              <p>Export your watchlist stocks with current prices</p>
+              <div class="export-meta">
+                <span class="record-count">{{ watchlist.length }} stocks</span>
+              </div>
+              <div class="export-buttons">
+                <button (click)="exportData('watchlist', 'csv')" class="btn-csv">
+                  <span>📄</span> CSV
+                </button>
+                <button (click)="exportData('watchlist', 'json')" class="btn-json">
+                  <span>📋</span> JSON
+                </button>
+              </div>
+            </div>
+            
+            <!-- Currencies Export -->
+            <div class="export-card">
+              <div class="export-icon currencies">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </div>
+              <h3>Currency Rates</h3>
+              <p>Export forex currency pair rates and changes</p>
+              <div class="export-meta">
+                <span class="record-count">{{ currencyPairs.length }} pairs</span>
+              </div>
+              <div class="export-buttons">
+                <button (click)="exportData('currencies', 'csv')" class="btn-csv">
+                  <span>📄</span> CSV
+                </button>
+                <button (click)="exportData('currencies', 'json')" class="btn-json">
+                  <span>📋</span> JSON
+                </button>
+              </div>
+            </div>
+            
+            <!-- All Data Export -->
+            <div class="export-card all-data">
+              <div class="export-icon all">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <path d="M12 12v6"/>
+                  <path d="M9 15h6"/>
+                </svg>
+              </div>
+              <h3>Complete Export</h3>
+              <p>Download all trading data in a single file</p>
+              <div class="export-meta">
+                <span class="record-count">All data</span>
+              </div>
+              <div class="export-buttons">
+                <button (click)="exportData('orders', 'json'); exportData('positions', 'json'); exportData('executions', 'json')" class="btn-all">
+                  <span>📦</span> Export All
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Export Info -->
+          <div class="export-info">
+            <div class="info-card">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <line x1="12" y1="8" x2="12.01" y2="8"/>
+              </svg>
+              <div class="info-content">
+                <h4>Export Formats</h4>
+                <p><strong>CSV:</strong> Compatible with Excel, Google Sheets, and most spreadsheet applications.</p>
+                <p><strong>JSON:</strong> Machine-readable format ideal for data analysis and integration with other tools.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Commodities View -->
+    <ng-container *ngIf="currentView === 'commodities'">
+      <div class="view-container commodities-view">
+        <div class="view-header">
+          <h2>Commodities Trading</h2>
+          <p>Trade commodities markets</p>
+        </div>
+        <app-commodities-trading></app-commodities-trading>
+      </div>
+    </ng-container>
+
+    <!-- Precious Metals View -->
+    <ng-container *ngIf="currentView === 'metals'">
+      <div class="view-container metals-view">
+        <div class="view-header">
+          <h2>Precious Metals</h2>
+          <p>Trade gold, silver, and other precious metals</p>
+        </div>
+        <app-precious-metals></app-precious-metals>
+      </div>
+    </ng-container>
+
+    <!-- Settings View -->
+    <ng-container *ngIf="currentView === 'settings'">
+      <div class="view-container settings-view">
+        <div class="view-header">
+          <h2>Settings</h2>
+          <p>Configure your trading preferences</p>
+        </div>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <h3>Connection Status</h3>
+            <div class="connection-info">
+              <div class="status-row">
+                <span>FIX Connection:</span>
+                <span class="status-indicator" [class.connected]="sessionStatus?.connected">
+                  {{ sessionStatus?.connected ? 'Connected' : 'Disconnected' }}
+                </span>
+              </div>
+              <div class="status-row" *ngIf="sessionStatus?.sessionId">
+                <span>Session ID:</span>
+                <span class="mono">{{ sessionStatus?.sessionId }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="settings-card">
+            <h3>System Health</h3>
+            <div class="health-info">
+              <div class="status-row">
+                <span>Status:</span>
+                <span class="status-indicator" [class.healthy]="systemHealth.healthy">
+                  {{ systemHealth.healthy ? 'Healthy' : 'Issues Detected' }}
+                </span>
+              </div>
+              <div class="status-row">
+                <span>Backend:</span>
+                <span>localhost:8090</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </main>
+</div>

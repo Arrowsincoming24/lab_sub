@@ -1,0 +1,13 @@
+﻿target/
+node_modules/
+dist/
+build/
+.DS_Store
+*.jar
+*.class
+.idea/
+.vscode/
+*.log
+runtime/
+*.tmp
+.env

@@ -1,0 +1,627 @@
+<!-- Watermark: Aarav Joshi -->
+<div class="app-container">
+  <!-- Toast Notifications -->
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts" 
+         class="toast" 
+         [class.toast-success]="toast.type === 'success'"
+         [class.toast-error]="toast.type === 'error'"
+         [class.toast-warning]="toast.type === 'warning'"
+         [class.toast-info]="toast.type === 'info'">
+      <div class="toast-icon">
+        <span *ngIf="toast.type === 'success'">✓</span>
+        <span *ngIf="toast.type === 'error'">✕</span>
+        <span *ngIf="toast.type === 'warning'">⚠</span>
+        <span *ngIf="toast.type === 'info'">ℹ</span>
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">{{ toast.title }}</div>
+        <div class="toast-message">{{ toast.message }}</div>
+      </div>
+      <button class="toast-dismiss" (click)="dismissToast(toast.id)">×</button>
+    </div>
+  </div>
+
+  <header class="header">
+    <h1>{{ title }}</h1>
+    <div class="session-controls">
+      <!-- User auth controls -->
+      <ng-container *ngIf="currentUser">
+        <span class="user-info">
+          <span class="user-icon">👤</span>
+          {{ currentUser.displayName }}
+          <span class="admin-badge" *ngIf="currentUser.isAdmin">ADMIN</span>
+          <span class="account-id">({{ currentUser.accountId }})</span>
+        </span>
+        <span class="balance">Balance: ${{ currentUser.balance | number:'1.2-2' }}</span>
+      </ng-container>
+      
+      <span class="status-indicator" [class.connected]="sessionInfo?.isConnected">
+        {{ sessionInfo?.isConnected ? 'Connected' : 'Disconnected' }}
+      </span>
+      
+      <ng-container *ngIf="currentUser">
+        <button class="btn-session" (click)="logon()" *ngIf="!sessionInfo?.isConnected">Connect</button>
+        <button class="btn-session btn-logout" (click)="logout()" *ngIf="sessionInfo?.isConnected">Disconnect</button>
+        
+        <!-- Feature Buttons -->
+        <div class="feature-buttons">
+          <button class="btn-feature" [class.active]="showWatchlistPanel" (click)="toggleWatchlistPanel()" title="Watchlist (Ctrl+W)">
+            ★ <span class="badge" *ngIf="watchlist.length > 0">{{ watchlist.length }}</span>
+          </button>
+          <button class="btn-feature" [class.active]="showAlertsPanel" (click)="toggleAlertsPanel()" title="Price Alerts (Ctrl+Shift+A)">
+            🔔 <span class="badge" *ngIf="getActiveAlerts().length > 0">{{ getActiveAlerts().length }}</span>
+          </button>
+          <button class="btn-feature" (click)="exportTradesToCSV()" title="Export Trades (Ctrl+E)">
+            📥
+          </button>
+        </div>
+        
+        <button class="btn-session btn-user-logout" (click)="userLogout()">Sign Out</button>
+      </ng-container>
+      
+      <ng-container *ngIf="!currentUser">
+        <button class="btn-session btn-login" (click)="showLogin()">Sign In</button>
+        <button class="btn-session btn-register" (click)="showRegister()">Register</button>
+      </ng-container>
+    </div>
+  </header>
+  
+  <!-- Login/Register Modal -->
+  <div class="modal-overlay" *ngIf="showLoginForm" (click)="cancelLogin()">
+    <div class="login-modal" (click)="$event.stopPropagation()">
+      <h2>{{ isRegistering ? 'Create Account' : 'Sign In' }}</h2>
+      
+      <div class="auth-error" *ngIf="authError">{{ authError }}</div>
+      
+      <form (ngSubmit)="submitLogin()">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" [(ngModel)]="loginForm.username" name="username" required placeholder="Enter username">
+        </div>
+        
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" [(ngModel)]="loginForm.password" name="password" required placeholder="Enter password">
+        </div>
+        
+        <ng-container *ngIf="isRegistering">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="loginForm.email" name="email" placeholder="Enter email">
+          </div>
+          
+          <div class="form-group">
+            <label>Display Name</label>
+            <input type="text" [(ngModel)]="loginForm.displayName" name="displayName" placeholder="Optional display name">
+          </div>
+        </ng-container>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">{{ isRegistering ? 'Create Account' : 'Sign In' }}</button>
+          <button type="button" class="btn-secondary" (click)="cancelLogin()">Cancel</button>
+        </div>
+        
+        <div class="auth-switch">
+          <span *ngIf="!isRegistering">Don't have an account? <a (click)="showRegister()">Register</a></span>
+          <span *ngIf="isRegistering">Already have an account? <a (click)="showLogin()">Sign In</a></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Watchlist Panel -->
+  <div class="side-panel watchlist-panel" *ngIf="showWatchlistPanel">
+    <div class="panel-header">
+      <h3>★ Watchlist</h3>
+      <button class="panel-close" (click)="showWatchlistPanel = false">×</button>
+    </div>
+    <div class="panel-content">
+      <div class="watchlist-items" *ngIf="getWatchlistData().length > 0">
+        <div class="watchlist-item" *ngFor="let stock of getWatchlistData()">
+          <div class="watchlist-symbol">{{ stock.symbol }}</div>
+          <div class="watchlist-price">${{ stock.lastPrice | number:'1.2-2' }}</div>
+          <div class="watchlist-change" [class.positive]="stock.changePercent >= 0" [class.negative]="stock.changePercent < 0">
+            {{ stock.changePercent >= 0 ? '+' : '' }}{{ stock.changePercent | number:'1.2-2' }}%
+          </div>
+          <button class="btn-remove" (click)="toggleWatchlist(stock.symbol)">×</button>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="watchlist.length === 0">
+        <p>No symbols in watchlist</p>
+        <p class="hint">Click ★ on any symbol to add</p>
+      </div>
+      <div class="add-to-watchlist">
+        <h4>Add Symbol</h4>
+        <div class="symbol-grid">
+          <button *ngFor="let sym of allSymbols" 
+                  class="symbol-btn"
+                  [class.in-watchlist]="isInWatchlist(sym)"
+                  (click)="toggleWatchlist(sym)">
+            {{ sym }}
+            <span class="watchlist-star">{{ isInWatchlist(sym) ? '★' : '☆' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Alerts Panel -->
+  <div class="side-panel alerts-panel" *ngIf="showAlertsPanel">
+    <div class="panel-header">
+      <h3>🔔 Price Alerts</h3>
+      <button class="panel-close" (click)="showAlertsPanel = false">×</button>
+    </div>
+    <div class="panel-content">
+      <!-- New Alert Form -->
+      <div class="new-alert-form">
+        <h4>Create Alert</h4>
+        <div class="alert-form-row">
+          <select [(ngModel)]="newAlert.symbol">
+            <option *ngFor="let sym of allSymbols" [value]="sym">{{ sym }}</option>
+          </select>
+          <select [(ngModel)]="newAlert.condition">
+            <option value="above">Above</option>
+            <option value="below">Below</option>
+          </select>
+          <input type="number" [(ngModel)]="newAlert.targetPrice" step="0.01" placeholder="Price">
+          <button class="btn-add-alert" (click)="addPriceAlert()">+</button>
+        </div>
+      </div>
+      
+      <!-- Active Alerts -->
+      <div class="alerts-section" *ngIf="getActiveAlerts().length > 0">
+        <h4>Active Alerts</h4>
+        <div class="alert-item" *ngFor="let alert of getActiveAlerts()">
+          <div class="alert-details">
+            <span class="alert-symbol">{{ alert.symbol }}</span>
+            <span class="alert-condition">{{ alert.condition }}</span>
+            <span class="alert-price">${{ alert.targetPrice | number:'1.2-2' }}</span>
+          </div>
+          <button class="btn-remove" (click)="removeAlert(alert.id)">×</button>
+        </div>
+      </div>
+      
+      <!-- Triggered Alerts -->
+      <div class="alerts-section triggered" *ngIf="getTriggeredAlerts().length > 0">
+        <h4>Triggered <button class="btn-clear-triggered" (click)="clearTriggeredAlerts()">Clear All</button></h4>
+        <div class="alert-item triggered" *ngFor="let alert of getTriggeredAlerts()">
+          <div class="alert-details">
+            <span class="alert-symbol">{{ alert.symbol }}</span>
+            <span class="alert-condition">{{ alert.condition }}</span>
+            <span class="alert-price">${{ alert.targetPrice | number:'1.2-2' }}</span>
+          </div>
+          <button class="btn-remove" (click)="removeAlert(alert.id)">×</button>
+        </div>
+      </div>
+      
+      <div class="empty-state" *ngIf="priceAlerts.length === 0">
+        <p>No price alerts set</p>
+        <p class="hint">Create an alert to get notified when price hits your target</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Market Ticker -->
+  <div class="market-ticker" *ngIf="marketData.length > 0">
+    <div class="ticker-content">
+      <ng-container *ngFor="let stock of marketData">
+        <div class="ticker-item">
+          <span class="symbol">{{ stock.symbol }}</span>
+          <span class="price">${{ stock.lastPrice | number:'1.2-2' }}</span>
+          <span class="change" [class.positive]="stock.changePercent >= 0" [class.negative]="stock.changePercent < 0">
+            {{ stock.changePercent >= 0 ? '+' : '' }}{{ stock.changePercent | number:'1.2-2' }}%
+          </span>
+        </div>
+      </ng-container>
+      <ng-container *ngFor="let stock of marketData">
+        <div class="ticker-item">
+          <span class="symbol">{{ stock.symbol }}</span>
+          <span class="price">${{ stock.lastPrice | number:'1.2-2' }}</span>
+          <span class="change" [class.positive]="stock.changePercent >= 0" [class.negative]="stock.changePercent < 0">
+            {{ stock.changePercent >= 0 ? '+' : '' }}{{ stock.changePercent | number:'1.2-2' }}%
+          </span>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  
+  <!-- Not Logged In Message -->
+  <div class="login-prompt" *ngIf="!currentUser">
+    <div class="login-prompt-content">
+      <h2>Welcome to Broker Platform</h2>
+      <p>Sign in or create an account to start trading.</p>
+      <div class="login-prompt-buttons">
+        <button class="btn-primary" (click)="showLogin()">Sign In</button>
+        <button class="btn-secondary" (click)="showRegister()">Create Account</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content (only when logged in) -->
+  <ng-container *ngIf="currentUser">
+  <div class="dashboard-stats">
+    <div class="stat-item">
+      <div class="stat-label">Portfolio Value</div>
+      <div class="stat-value">${{ totalPortfolioValue | number:'1.2-2' }}</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Unrealized P&L</div>
+      <div class="stat-value" [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">
+        {{ totalUnrealizedPnL >= 0 ? '+' : '' }}${{ totalUnrealizedPnL | number:'1.2-2' }}
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Positions</div>
+      <div class="stat-value">{{ positions.length }}</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Filled</div>
+      <div class="stat-value positive">{{ getFilledCount() }}</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">Open Orders</div>
+      <div class="stat-value">{{ getOpenCount() }}</div>
+    </div>
+  </div>
+  
+  <main class="main-content">
+    <!-- Orders Table -->
+    <div class="orders-section">
+      <div class="section-header">
+        <h2>My Orders</h2>
+        <button class="btn-refresh" (click)="refreshOrders()">↻ Refresh</button>
+      </div>
+      
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      <div class="loading" *ngIf="loading">Loading orders...</div>
+      
+      <div class="orders-table-container" *ngIf="!loading">
+        <table class="orders-table" *ngIf="orders.length > 0">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Symbol</th>
+              <th>Side</th>
+              <th class="numeric">Qty</th>
+              <th class="numeric">Price</th>
+              <th>Status</th>
+              <th class="numeric">Filled</th>
+              <th>Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders">
+              <td>{{ order.clOrdId }}</td>
+              <td class="symbol">{{ order.symbol }}</td>
+              <td [class]="getSideClass(order.side)">{{ getSideLabel(order.side) }}</td>
+              <td class="numeric">{{ order.quantity | number }}</td>
+              <td class="numeric">${{ order.price | number:'1.2-2' }}</td>
+              <td [class]="getStatusClass(order.status)">{{ order.status }}</td>
+              <td class="numeric">{{ order.filledQty || 0 }}</td>
+              <td class="time">{{ order.createdAt | date:'HH:mm:ss' }}</td>
+              <td>
+                <button class="btn-cancel" 
+                        (click)="cancelOrder(order.clOrdId)" 
+                        *ngIf="order.status === 'NEW' || order.status === 'PARTIALLY_FILLED'">
+                  Cancel
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="no-orders" *ngIf="orders.length === 0">
+          <p>No orders yet. Submit an order to send via FIX protocol.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Entry Panel -->
+    <div class="order-form-section">
+      <h2>New Order</h2>
+      
+      <div class="quick-trade">
+        <button class="quick-btn" *ngFor="let sym of quickSymbols" 
+                [class.selected]="newOrder.symbol === sym"
+                (click)="newOrder.symbol = sym">{{ sym }}</button>
+      </div>
+      
+      <div class="order-form">
+        <div class="side-selector">
+          <button [class.active-buy]="newOrder.side === '1'" (click)="newOrder.side = '1'">BUY</button>
+          <button [class.active-sell]="newOrder.side === '2'" (click)="newOrder.side = '2'">SELL</button>
+        </div>
+        
+        <div class="form-group">
+          <label>Symbol</label>
+          <select [(ngModel)]="newOrder.symbol">
+            <option *ngFor="let sym of allSymbols" [value]="sym">{{ sym }}</option>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" [(ngModel)]="newOrder.quantity" min="1">
+          </div>
+          <div class="form-group">
+            <label>Price</label>
+            <input type="number" [(ngModel)]="newOrder.price" step="0.01" min="0.01">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Order Type</label>
+            <select [(ngModel)]="newOrder.orderType">
+              <option value="LIMIT">LIMIT</option>
+              <option value="MARKET">MARKET</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Time in Force</label>
+            <select [(ngModel)]="newOrder.timeInForce">
+              <option value="DAY">DAY</option>
+              <option value="GTC">GTC</option>
+              <option value="IOC">IOC</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="order-summary">
+          <div class="summary-row">
+            <span class="label">Side</span>
+            <span class="value" [style.color]="newOrder.side === '1' ? '#3fb950' : '#f85149'">{{ newOrder.side === '1' ? 'BUY' : 'SELL' }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Quantity</span>
+            <span class="value">{{ newOrder.quantity | number }}</span>
+          </div>
+          <div class="summary-row total">
+            <span class="label">Est. Value</span>
+            <span class="value">${{ (newOrder.quantity * newOrder.price) | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        
+        <button class="btn-submit" 
+                [class.buy]="newOrder.side === '1'" 
+                [class.sell]="newOrder.side === '2'" 
+                (click)="submitOrder()" 
+                [disabled]="!sessionInfo?.isConnected">
+          {{ newOrder.side === '1' ? 'BUY' : 'SELL' }} {{ newOrder.symbol }}
+        </button>
+        
+        <p *ngIf="!sessionInfo?.isConnected" style="text-align: center; color: #f85149; font-size: 11px; margin-top: 8px;">
+          Connect to Exchange to submit orders
+        </p>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Positions Section -->
+  <section class="positions-section" *ngIf="positions.length > 0">
+    <div class="panel">
+      <h2>Portfolio Positions</h2>
+      <table class="positions-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th class="numeric">Qty</th>
+            <th class="numeric">Avg Price</th>
+            <th class="numeric">Current</th>
+            <th class="numeric">Market Value</th>
+            <th class="numeric">P&L</th>
+            <th class="numeric">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pos of positions">
+            <td class="symbol">{{ pos.symbol }}</td>
+            <td class="numeric">{{ pos.quantity | number }}</td>
+            <td class="numeric">${{ pos.avgPrice | number:'1.2-2' }}</td>
+            <td class="numeric">${{ pos.currentPrice | number:'1.2-2' }}</td>
+            <td class="numeric">${{ pos.marketValue | number:'1.2-2' }}</td>
+            <td class="numeric" [class.positive]="pos.unrealizedPnL >= 0" [class.negative]="pos.unrealizedPnL < 0">
+              {{ pos.unrealizedPnL >= 0 ? '+' : '' }}${{ pos.unrealizedPnL | number:'1.2-2' }}
+            </td>
+            <td class="numeric" [class.positive]="pos.unrealizedPnLPercent >= 0" [class.negative]="pos.unrealizedPnLPercent < 0">
+              {{ pos.unrealizedPnLPercent >= 0 ? '+' : '' }}{{ pos.unrealizedPnLPercent | number:'1.2-2' }}%
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td colspan="4">Total Portfolio</td>
+            <td class="numeric">${{ totalPortfolioValue | number:'1.2-2' }}</td>
+            <td class="numeric" [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">
+              {{ totalUnrealizedPnL >= 0 ? '+' : '' }}${{ totalUnrealizedPnL | number:'1.2-2' }}
+            </td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+  <!-- Performance Analytics Section -->
+  <section class="analytics-section">
+    <div class="analytics-grid">
+      <!-- Trading Performance Card -->
+      <div class="analytics-card">
+        <div class="analytics-header">
+          <h3>📊 Trading Performance</h3>
+          <span class="period-badge">Today</span>
+        </div>
+        <div class="performance-metrics">
+          <div class="metric">
+            <span class="metric-label">Win Rate</span>
+            <span class="metric-value positive">{{ getWinRate() | number:'1.1-1' }}%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Total Trades</span>
+            <span class="metric-value">{{ getTotalTrades() }}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Avg Profit</span>
+            <span class="metric-value" [class.positive]="getAvgProfit() >= 0" [class.negative]="getAvgProfit() < 0">
+              {{ getAvgProfit() >= 0 ? '+' : '' }}${{ getAvgProfit() | number:'1.2-2' }}
+            </span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Best Trade</span>
+            <span class="metric-value positive">+${{ getBestTrade() | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Market Overview Card -->
+      <div class="analytics-card">
+        <div class="analytics-header">
+          <h3>📈 Market Overview</h3>
+          <span class="live-badge">● LIVE</span>
+        </div>
+        <div class="market-overview-grid">
+          <div class="market-mini" *ngFor="let stock of marketData.slice(0, 6)">
+            <div class="mini-header">
+              <span class="mini-symbol">{{ stock.symbol }}</span>
+              <span class="mini-change" [class.positive]="stock.changePercent >= 0" [class.negative]="stock.changePercent < 0">
+                {{ stock.changePercent >= 0 ? '↑' : '↓' }}{{ stock.changePercent | number:'1.1-1' }}%
+              </span>
+            </div>
+            <div class="mini-price">${{ stock.lastPrice | number:'1.2-2' }}</div>
+            <div class="mini-sparkline">
+              <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                <polyline [attr.points]="getSparklinePoints(stock.symbol)" 
+                          fill="none" 
+                          [attr.stroke]="stock.changePercent >= 0 ? '#00c853' : '#ff1744'" 
+                          stroke-width="2"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Actions Card -->
+      <div class="analytics-card actions-card">
+        <div class="analytics-header">
+          <h3>⚡ Quick Actions</h3>
+        </div>
+        <div class="quick-actions-grid">
+          <button class="action-btn buy" (click)="quickBuy('AAPL', 10)">
+            <span class="action-symbol">AAPL</span>
+            <span class="action-label">Buy 10</span>
+          </button>
+          <button class="action-btn buy" (click)="quickBuy('MSFT', 10)">
+            <span class="action-symbol">MSFT</span>
+            <span class="action-label">Buy 10</span>
+          </button>
+          <button class="action-btn buy" (click)="quickBuy('GOOGL', 5)">
+            <span class="action-symbol">GOOGL</span>
+            <span class="action-label">Buy 5</span>
+          </button>
+          <button class="action-btn sell" (click)="quickSell('AAPL', 10)">
+            <span class="action-symbol">AAPL</span>
+            <span class="action-label">Sell 10</span>
+          </button>
+          <button class="action-btn sell" (click)="quickSell('MSFT', 10)">
+            <span class="action-symbol">MSFT</span>
+            <span class="action-label">Sell 10</span>
+          </button>
+          <button class="action-btn sell" (click)="quickSell('GOOGL', 5)">
+            <span class="action-symbol">GOOGL</span>
+            <span class="action-label">Sell 5</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Risk Management Card -->
+      <div class="analytics-card risk-card">
+        <div class="analytics-header">
+          <h3>🛡️ Risk Management</h3>
+        </div>
+        <div class="risk-metrics">
+          <div class="risk-item">
+            <span class="risk-label">Exposure</span>
+            <div class="risk-bar">
+              <div class="risk-fill" [style.width.%]="getExposurePercent()" [class.warning]="getExposurePercent() > 70" [class.danger]="getExposurePercent() > 90"></div>
+            </div>
+            <span class="risk-value">{{ getExposurePercent() | number:'1.0-0' }}%</span>
+          </div>
+          <div class="risk-item">
+            <span class="risk-label">Daily P&L Limit</span>
+            <div class="risk-bar">
+              <div class="risk-fill safe" [style.width.%]="getDailyPnLPercent()"></div>
+            </div>
+            <span class="risk-value">${{ getDailyPnL() | number:'1.0-0' }}</span>
+          </div>
+          <div class="risk-item">
+            <span class="risk-label">Open Positions</span>
+            <span class="risk-count">{{ positions.length }} / 10</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Market Depth Widget -->
+  <section class="market-depth-section" *ngIf="currentUser">
+    <div class="depth-panel">
+      <div class="depth-header">
+        <h3>📊 Order Book Depth - {{ newOrder.symbol }}</h3>
+        <select [(ngModel)]="depthSymbol" (change)="onDepthSymbolChange()">
+          <option *ngFor="let sym of quickSymbols" [value]="sym">{{ sym }}</option>
+        </select>
+      </div>
+      <div class="depth-grid">
+        <div class="depth-side bids">
+          <div class="depth-title">BIDS</div>
+          <div class="depth-row" *ngFor="let bid of getBids()">
+            <span class="depth-qty">{{ bid.qty }}</span>
+            <span class="depth-price">${{ bid.price | number:'1.2-2' }}</span>
+            <div class="depth-bar bid" [style.width.%]="bid.percent"></div>
+          </div>
+        </div>
+        <div class="depth-spread">
+          <div class="spread-label">Spread</div>
+          <div class="spread-value">${{ getSpread() | number:'1.2-2' }}</div>
+        </div>
+        <div class="depth-side asks">
+          <div class="depth-title">ASKS</div>
+          <div class="depth-row" *ngFor="let ask of getAsks()">
+            <span class="depth-price">${{ ask.price | number:'1.2-2' }}</span>
+            <span class="depth-qty">{{ ask.qty }}</span>
+            <div class="depth-bar ask" [style.width.%]="ask.percent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Keyboard Shortcuts Help -->
+  <div class="hotkeys-panel" *ngIf="showHotkeysPanel">
+    <div class="hotkeys-header">
+      <h3>⌨️ Keyboard Shortcuts</h3>
+      <button class="close-btn" (click)="showHotkeysPanel = false">×</button>
+    </div>
+    <div class="hotkeys-grid">
+      <div class="hotkey-item"><kbd>Ctrl</kbd>+<kbd>B</kbd> Quick Buy</div>
+      <div class="hotkey-item"><kbd>Ctrl</kbd>+<kbd>S</kbd> Quick Sell</div>
+      <div class="hotkey-item"><kbd>Ctrl</kbd>+<kbd>W</kbd> Watchlist</div>
+      <div class="hotkey-item"><kbd>Ctrl</kbd>+<kbd>E</kbd> Export CSV</div>
+      <div class="hotkey-item"><kbd>Ctrl</kbd>+<kbd>R</kbd> Refresh</div>
+      <div class="hotkey-item"><kbd>Esc</kbd> Close Panels</div>
+    </div>
+  </div>
+  <button class="hotkeys-trigger" (click)="showHotkeysPanel = !showHotkeysPanel" title="Keyboard Shortcuts">⌨️</button>
+  
+  </ng-container>
+  
+  <footer class="footer">
+    <div class="footer-content">
+      <span class="footer-brand">💼 Broker Trading Platform</span>
+      <span class="footer-info">FIX 4.4 Initiator | Target: localhost:9876</span>
+      <span class="footer-time">{{ currentTime | date:'HH:mm:ss' }}</span>
+    </div>
+  </footer>
+</div>

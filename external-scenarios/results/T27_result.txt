@@ -1,0 +1,26 @@
+: Adding FIX 4.0 protocol
+: Adding FIX 4.1 protocol
+: Adding FIX 4.2 protocol
+: Adding FIX 4.3 protocol
+: Adding FIX 4.4 protocol
+: Bulding FIX 4.4 help
+: Pipe (batch/log) interface active at \\.\pipe\minifix
+: (C)2009-2013 Björn Ahlqvist, available free of charge from http://elato.se/minifix/
+: Welcome to Mini-FIX 1.5.25!
+: Pipe interface connected
+: Pipe interface disconnected (code 109)
+: Pipe interface connected
+: Batch Session sequence numbers reset
+: SenderCompId set to MINIFIX
+: TargetCompId set to EXCHANGE
+: Batch Connect 127.0.0.1:9876
+: Connect to 127.0.0.1, resolving..
+: IP address 127.0.0.1 port 9876, connecting..
+: Connected to 127.0.0.1:9876 at 20260416-01:49:37 UTC
+< 8=FIX.4.2|9=66|35=A|49=MINIFIX|56=EXCHANGE|34=1|52=20260416-01:49:37|98=0|108=30|10=150|
+> 8=FIX.4.2|9=70|35=A|34=1|49=EXCHANGE|52=20260416-01:49:37.475|56=MINIFIX|98=0|108=30|10=095|
+: <done waiting, message matches>
+< 8=FIX.4.2|9=131|35=D|49=MINIFIX|56=EXCHANGE|34=2|52=20260416-01:49:37|11=78055345|21=1|55=AAPL|54=1|60=20260416-01:49:37|40=2|44=100.00|38=50|59=0|10=244|
+> 8=FIX.4.2|9=216|35=8|34=2|49=EXCHANGE|52=20260416-01:49:37.492|56=MINIFIX|6=0|11=78055345|14=0|17=EXEC-1776303563306|31=0|32=0|37=20260416-071937-612809|38=50|39=0|40=2|44=100|54=1|55=AAPL|59=0|60=20260416-07:19:37.492|150=0|151=50|10=003|
+: T27 PASSED - Heartbeat negotiated (HeartBtInt=30) and session functional
+: Batch Save to C:\Users\Aarav\OneDrive\Desktop\cmltest\fix-trading-simulator\external-scenarios\results\T27_result.txt

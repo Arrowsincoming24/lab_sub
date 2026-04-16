@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-04-16 13:16:32",
+  "users": 100,
+  "connected": 100,
+  "ordersSent": 200,
+  "ordersAcked": 200,
+  "orderRejects": 0,
+  "latencyIssues": 0,
+  "retries": 0,
+  "elapsedSec": 1.1,
+  "throughput": 178.07,
+  "connectionRate": 100.0,
+  "orderAckRate": 100.0,
+  "latency": {
+    "connect": {
+      "p50": 39.88,
+      "p95": 57.7,
+      "p99": 60.1
+    },
+    "logonAck": {
+      "p50": 76.22,
+      "p95": 201.81,
+      "p99": 212.08
+    },
+    "orderAck": {
+      "p50": 288.47,
+      "p95": 405.51,
+      "p99": 436.61
+    }
+  },
+  "config": {
+    "host": "127.0.0.1",
+    "port": 9876,
+    "symbol": "AAPL",
+    "targetCompId": "EXCHANGE"
+  },
+  "kpiTrend": {
+    "users": "+0%",
+    "connected": "0%",
+    "throughput": "17807%",
+    "latency": "+0"
+  },
+  "latencyDist": [
+    {
+      "bucket": "<100ms",
+      "value": 18
+    },
+    {
+      "bucket": "100-300ms",
+      "value": 102
+    },
+    {
+      "bucket": "300-500ms",
+      "value": 80
+    },
+    {
+      "bucket": ">500ms",
+      "value": 0
+    }
+  ],
+  "failedRows": []
+}

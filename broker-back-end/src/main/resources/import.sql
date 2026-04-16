@@ -1,0 +1,2 @@
+-- Sample data for Broker Back-End H2 database
+-- Table is created by Hibernate from OrderEntity

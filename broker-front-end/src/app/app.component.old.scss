@@ -1,0 +1,1550 @@
+/* Watermark: Aarav Joshi */
+// Professional Light Trading Platform - Broker Theme
+$primary: #7c3aed;
+$primary-light: #f3e8ff;
+$success: #00c853;
+$success-light: #e8f5e9;
+$danger: #ff1744;
+$danger-light: #ffebee;
+$warning: #ff9100;
+$warning-light: #fff3e0;
+$bg-page: #f5f7fa;
+$bg-card: #ffffff;
+$bg-header: #ffffff;
+$bg-input: #f8f9fa;
+$text-primary: #1a1a2e;
+$text-secondary: #6c757d;
+$text-muted: #adb5bd;
+$border-color: #e9ecef;
+$shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+$shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+* { box-sizing: border-box; }
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: $bg-page;
+  color: $text-primary;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.header {
+  background: $bg-header;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid $border-color;
+  box-shadow: $shadow-sm;
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    &::before { content: '??'; font-size: 24px; }
+  }
+}
+
+.session-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background: $danger-light;
+    color: $danger;
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    &.connected { background: $success-light; color: $success; }
+  }
+  .btn-session {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: $success;
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 8px rgba($success, 0.3);
+    &:hover { background: darken($success, 8%); transform: translateY(-1px); }
+    &.btn-logout {
+      background: transparent;
+      color: $danger;
+      border: 2px solid $danger;
+      box-shadow: none;
+      &:hover { background: $danger; color: #fff; }
+    }
+  }
+}
+
+.market-ticker {
+  background: linear-gradient(90deg, $bg-card 0%, $bg-input 100%);
+  border-bottom: 1px solid $border-color;
+  overflow: hidden;
+  height: 48px;
+  .ticker-content {
+    display: flex;
+    gap: 32px;
+    padding: 12px 20px;
+    animation: ticker 40s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    .symbol { font-weight: 700; color: $text-primary; }
+    .price { color: $text-secondary; font-family: 'SF Mono', monospace; }
+    .change {
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      &.positive { background: $success-light; color: $success; }
+      &.negative { background: $danger-light; color: $danger; }
+    }
+  }
+}
+
+.main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  padding: 20px 24px;
+  @media (max-width: 1000px) { grid-template-columns: 1fr; }
+}
+
+.orders-section {
+  background: $bg-card;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: $shadow-sm;
+  border: 1px solid $border-color;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  h2 { margin: 0; font-size: 14px; font-weight: 700; color: $text-primary; text-transform: uppercase; letter-spacing: 0.5px; }
+}
+
+.btn-refresh {
+  padding: 8px 16px;
+  background: $bg-input;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  color: $text-secondary;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: $primary-light; color: $primary; border-color: $primary; }
+}
+
+.orders-table-container { flex: 1; overflow: auto; border-radius: 12px; border: 1px solid $border-color; }
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  thead {
+    position: sticky;
+    top: 0;
+    background: $bg-input;
+    th {
+      padding: 14px 12px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: $text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid $border-color;
+      &.numeric { text-align: right; }
+    }
+  }
+  tbody tr {
+    transition: background 0.15s;
+    &:hover { background: $bg-input; }
+    &:not(:last-child) td { border-bottom: 1px solid $border-color; }
+  }
+  td {
+    padding: 14px 12px;
+    color: $text-primary;
+    &.symbol { font-weight: 700; color: $primary; }
+    &.numeric { text-align: right; font-family: 'SF Mono', monospace; }
+    &.time { color: $text-secondary; font-size: 12px; }
+  }
+}
+
+.btn-cancel {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid $danger;
+  border-radius: 6px;
+  color: $danger;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover { background: $danger; color: #fff; }
+}
+
+.order-form-section {
+  background: $bg-card;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: $shadow-sm;
+  border: 1px solid $border-color;
+  h2 { margin: 0 0 16px 0; font-size: 14px; font-weight: 700; color: $text-primary; text-transform: uppercase; letter-spacing: 0.5px; }
+}
+
+.quick-trade {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  .quick-btn {
+    padding: 10px 14px;
+    background: $bg-input;
+    border: 2px solid $border-color;
+    border-radius: 8px;
+    color: $text-secondary;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    &:hover { border-color: $primary; color: $primary; }
+    &.selected { border-color: $primary; background: $primary-light; color: $primary; }
+  }
+}
+
+.order-form { display: flex; flex-direction: column; gap: 14px; }
+
+.side-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  button {
+    padding: 14px;
+    border: 2px solid $border-color;
+    border-radius: 10px;
+    background: $bg-card;
+    color: $text-secondary;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    &:hover { border-color: $text-muted; }
+    &.active-buy { background: $success-light; border-color: $success; color: $success; }
+    &.active-sell { background: $danger-light; border-color: $danger; color: $danger; }
+  }
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.form-group {
+  label {
+    display: block;
+    font-size: 11px;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    background: $bg-input;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    color: $text-primary;
+    font-size: 14px;
+    transition: all 0.2s;
+    &:focus { outline: none; border-color: $primary; box-shadow: 0 0 0 3px rgba($primary, 0.1); }
+  }
+}
+
+.order-summary {
+  background: $bg-input;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid $border-color;
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 8px;
+    &:last-child { margin-bottom: 0; }
+    .label { color: $text-secondary; }
+    .value { color: $text-primary; font-weight: 600; font-family: 'SF Mono', monospace; }
+    &.total { border-top: 1px solid $border-color; padding-top: 10px; margin-top: 10px; }
+    &.total .value { font-size: 15px; color: $primary; }
+  }
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: $primary;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba($primary, 0.3);
+  &:hover { background: darken($primary, 8%); transform: translateY(-1px); }
+  &.buy { background: $success; box-shadow: 0 4px 12px rgba($success, 0.3); &:hover { background: darken($success, 8%); } }
+  &.sell { background: $danger; box-shadow: 0 4px 12px rgba($danger, 0.3); &:hover { background: darken($danger, 8%); } }
+  &:disabled { background: $text-muted; box-shadow: none; cursor: not-allowed; transform: none; }
+}
+
+.status-new { color: $primary !important; font-weight: 600; &::before { content: '? '; } }
+.status-partial { color: $warning !important; font-weight: 600; &::before { content: '? '; } }
+.status-filled { color: $success !important; font-weight: 600; &::before { content: '? '; } }
+.status-canceled { color: $text-muted !important; font-weight: 600; &::before { content: '? '; } }
+.status-rejected, .status-unknown { color: $danger !important; font-weight: 600; &::before { content: '? '; } }
+.side-buy { color: $success !important; font-weight: 700; }
+.side-sell { color: $danger !important; font-weight: 700; }
+
+.alert {
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  &-error { background: $danger-light; color: $danger; border: 1px solid rgba($danger, 0.2); }
+  &-success { background: $success-light; color: $success; border: 1px solid rgba($success, 0.2); }
+}
+
+.loading { text-align: center; padding: 40px; color: $text-secondary; font-size: 14px; }
+.no-orders { text-align: center; padding: 60px 20px; color: $text-secondary; font-size: 14px; p { margin: 0; } }
+
+// Dashboard Stats
+.dashboard-stats {
+  display: flex;
+  gap: 16px;
+  padding: 16px 24px;
+  background: $bg-card;
+  border-bottom: 1px solid $border-color;
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 20px;
+    background: $bg-input;
+    border-radius: 12px;
+    min-width: 140px;
+    .stat-label { font-size: 11px; color: $text-secondary; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .stat-value { font-size: 18px; font-weight: 700; color: $text-primary; font-family: 'SF Mono', monospace; }
+    .stat-value.positive { color: $success; }
+    .stat-value.negative { color: $danger; }
+  }
+}
+
+// Positions Section
+.positions-section {
+  padding: 0 24px 24px 24px;
+  .panel {
+    background: $bg-card;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: $shadow-sm;
+  }
+  h2 {
+    margin: 0 0 16px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: $text-primary;
+    &::before { content: '?? '; }
+  }
+}
+
+.positions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  thead th {
+    padding: 14px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    background: $bg-input;
+    border-bottom: 1px solid $border-color;
+    &:first-child { border-radius: 8px 0 0 0; }
+    &:last-child { border-radius: 0 8px 0 0; }
+    &.numeric { text-align: right; }
+  }
+  tbody tr {
+    transition: background 0.15s;
+    &:hover { background: $bg-input; }
+    &:not(:last-child) td { border-bottom: 1px solid $border-color; }
+  }
+  td {
+    padding: 14px 12px;
+    color: $text-primary;
+    &.symbol { font-weight: 700; color: $primary; }
+    &.numeric { text-align: right; font-family: 'SF Mono', monospace; }
+    &.positive { color: $success !important; font-weight: 600; }
+    &.negative { color: $danger !important; font-weight: 600; }
+  }
+  tfoot {
+    .totals-row {
+      background: $bg-input;
+      font-weight: 700;
+      td {
+        padding: 14px 12px;
+        border-top: 2px solid $border-color;
+        &:first-child { border-radius: 0 0 0 8px; }
+        &:last-child { border-radius: 0 0 8px 0; }
+      }
+    }
+  }
+}
+
+.footer {
+  background: $bg-card;
+  padding: 16px 24px;
+  border-top: 1px solid $border-color;
+  text-align: center;
+  p { margin: 0; font-size: 12px; color: $text-secondary; }
+}
+
+// User Info in Header
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: $primary-light;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $primary;
+  .user-icon { font-size: 16px; }
+  .account-id { font-size: 10px; color: $text-secondary; font-weight: 400; }
+  .admin-badge {
+    background: linear-gradient(135deg, #FF6B35, #F7931E);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(255, 107, 53, 0.3);
+  }
+}
+
+.balance {
+  font-size: 13px;
+  font-weight: 600;
+  color: $success;
+  padding: 8px 16px;
+  background: $success-light;
+  border-radius: 20px;
+}
+
+.btn-user-logout {
+  background: transparent !important;
+  color: $text-secondary !important;
+  border: 2px solid $border-color !important;
+  box-shadow: none !important;
+  &:hover { background: $bg-input !important; color: $text-primary !important; }
+}
+
+.btn-login, .btn-register {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-login {
+  background: $primary;
+  color: #fff;
+  &:hover { background: darken($primary, 8%); }
+}
+
+.btn-register {
+  background: transparent;
+  color: $primary;
+  border: 2px solid $primary !important;
+  &:hover { background: $primary-light; }
+}
+
+// Login Modal
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.login-modal {
+  background: $bg-card;
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: $shadow-md;
+  
+  h2 {
+    margin: 0 0 24px;
+    font-size: 24px;
+    font-weight: 700;
+    color: $text-primary;
+    text-align: center;
+  }
+  
+  .form-group {
+    margin-bottom: 16px;
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: $text-secondary;
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid $border-color;
+      border-radius: 8px;
+      font-size: 14px;
+      background: $bg-input;
+      transition: border-color 0.2s;
+      &:focus {
+        outline: none;
+        border-color: $primary;
+      }
+    }
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    .btn-primary, .btn-secondary {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+    .btn-primary {
+      background: $primary;
+      color: #fff;
+      &:hover { background: darken($primary, 8%); }
+    }
+    .btn-secondary {
+      background: transparent;
+      color: $text-secondary;
+      border: 2px solid $border-color;
+      &:hover { background: $bg-input; }
+    }
+  }
+  
+  .auth-switch {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: $text-secondary;
+    a {
+      color: $primary;
+      cursor: pointer;
+      font-weight: 600;
+      &:hover { text-decoration: underline; }
+    }
+  }
+  
+  .auth-error {
+    background: $danger-light;
+    color: $danger;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+}
+
+// Login Prompt (not logged in state)
+.login-prompt {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-prompt-content {
+  text-align: center;
+  max-width: 400px;
+  
+  h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 16px;
+  }
+  
+  p {
+    font-size: 16px;
+    color: $text-secondary;
+    margin-bottom: 32px;
+  }
+}
+
+.login-prompt-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  
+  .btn-primary, .btn-secondary {
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+  
+  .btn-primary {
+    background: $primary;
+    color: #fff;
+    &:hover { background: darken($primary, 8%); }
+  }
+  
+  .btn-secondary {
+    background: transparent;
+    color: $primary;
+    border: 2px solid $primary;
+    &:hover { background: $primary-light; }
+  }
+}
+
+// Toast Notifications
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: $bg-card;
+  border-radius: 10px;
+  box-shadow: $shadow-md;
+  border-left: 4px solid $text-secondary;
+  animation: slideIn 0.3s ease-out;
+  
+  @keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  &.toast-success {
+    border-left-color: $success;
+    .toast-icon { color: $success; background: $success-light; }
+  }
+  
+  &.toast-error {
+    border-left-color: $danger;
+    .toast-icon { color: $danger; background: $danger-light; }
+  }
+  
+  &.toast-warning {
+    border-left-color: $warning;
+    .toast-icon { color: $warning; background: $warning-light; }
+  }
+  
+  &.toast-info {
+    border-left-color: $primary;
+    .toast-icon { color: $primary; background: $primary-light; }
+  }
+}
+
+.toast-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: $text-primary;
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: 12px;
+  color: $text-secondary;
+  line-height: 1.4;
+}
+
+.toast-dismiss {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: $text-muted;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  &:hover { color: $text-primary; }
+}
+
+// Feature Buttons
+.feature-buttons {
+  display: flex;
+  gap: 8px;
+  margin: 0 8px;
+}
+
+.btn-feature {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 2px solid $border-color;
+  background: $bg-card;
+  color: $text-secondary;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+    background: $primary-light;
+  }
+  
+  &.active {
+    border-color: $primary;
+    background: $primary;
+    color: #fff;
+  }
+  
+  .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: $danger;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 16px;
+    text-align: center;
+  }
+}
+
+// Side Panels
+.side-panel {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  width: 360px;
+  max-height: calc(100vh - 100px);
+  background: $bg-card;
+  border-radius: 12px;
+  box-shadow: $shadow-md;
+  z-index: 1000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: panelSlideIn 0.2s ease-out;
+  
+  @keyframes panelSlideIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid $border-color;
+  background: $bg-input;
+  
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+.panel-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: $text-secondary;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover { background: $border-color; color: $text-primary; }
+}
+
+.panel-content {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+// Watchlist Panel
+.watchlist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.watchlist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: $bg-input;
+  border-radius: 8px;
+  
+  .watchlist-symbol {
+    font-weight: 600;
+    font-size: 13px;
+    flex: 1;
+  }
+  
+  .watchlist-price {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  
+  .watchlist-change {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    
+    &.positive { color: $success; background: $success-light; }
+    &.negative { color: $danger; background: $danger-light; }
+  }
+}
+
+.btn-remove {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: $text-muted;
+  font-size: 16px;
+  cursor: pointer;
+  &:hover { background: $danger-light; color: $danger; }
+}
+
+.add-to-watchlist {
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.symbol-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.symbol-btn {
+  padding: 8px 4px;
+  border-radius: 6px;
+  border: 1px solid $border-color;
+  background: $bg-card;
+  color: $text-primary;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  
+  .watchlist-star {
+    font-size: 10px;
+    color: $text-muted;
+  }
+  
+  &:hover {
+    border-color: $primary;
+    background: $primary-light;
+    .watchlist-star { color: $primary; }
+  }
+  
+  &.in-watchlist {
+    border-color: $warning;
+    background: $warning-light;
+    .watchlist-star { color: $warning; }
+  }
+}
+
+// Price Alerts Panel
+.new-alert-form {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $border-color;
+  
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.alert-form-row {
+  display: flex;
+  gap: 8px;
+  
+  select, input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    font-size: 12px;
+    background: $bg-input;
+    color: $text-primary;
+    
+    &:focus {
+      outline: none;
+      border-color: $primary;
+    }
+  }
+  
+  select {
+    min-width: 80px;
+    cursor: pointer;
+  }
+  
+  input {
+    width: 80px;
+  }
+}
+
+.btn-add-alert {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border: none;
+  background: $primary;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: background 0.2s;
+  
+  &:hover { background: darken($primary, 8%); }
+}
+
+.alerts-section {
+  margin-bottom: 16px;
+  
+  h4 {
+    margin: 0 0 10px 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  &.triggered h4 { color: $warning; }
+}
+
+.btn-clear-triggered {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: none;
+  background: $warning-light;
+  color: $warning;
+  font-size: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: none;
+  
+  &:hover { background: $warning; color: #fff; }
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: $bg-input;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  
+  &.triggered {
+    background: $warning-light;
+    border: 1px solid rgba($warning, 0.3);
+  }
+}
+
+.alert-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .alert-symbol {
+    font-weight: 600;
+    font-size: 13px;
+  }
+  
+  .alert-condition {
+    font-size: 11px;
+    color: $text-secondary;
+    text-transform: uppercase;
+  }
+  
+  .alert-price {
+    font-size: 13px;
+    font-weight: 500;
+    color: $primary;
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: 24px 16px;
+  color: $text-secondary;
+  
+  p {
+    margin: 0;
+    font-size: 13px;
+  }
+  
+  .hint {
+    margin-top: 8px;
+    font-size: 11px;
+    color: $text-muted;
+  }
+}
+
+// Analytics Section
+.analytics-section {
+  padding: 0 24px 20px;
+  
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    @media (max-width: 1400px) { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 768px) { grid-template-columns: 1fr; }
+  }
+  
+  .analytics-card {
+    background: $bg-card;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: $shadow-sm;
+    border: 1px solid $border-color;
+    
+    .analytics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      
+      h3 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: $text-primary;
+      }
+      
+      .period-badge {
+        font-size: 10px;
+        padding: 4px 8px;
+        background: $primary-light;
+        color: $primary;
+        border-radius: 12px;
+        font-weight: 600;
+      }
+      
+      .live-badge {
+        font-size: 10px;
+        color: $success;
+        font-weight: 600;
+        animation: pulse 2s infinite;
+      }
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.performance-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  
+  .metric {
+    text-align: center;
+    padding: 10px;
+    background: $bg-input;
+    border-radius: 8px;
+    
+    .metric-label {
+      display: block;
+      font-size: 10px;
+      color: $text-secondary;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    
+    .metric-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: $text-primary;
+      
+      &.positive { color: $success; }
+      &.negative { color: $danger; }
+    }
+  }
+}
+
+.market-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  
+  .market-mini {
+    background: $bg-input;
+    border-radius: 8px;
+    padding: 10px;
+    
+    .mini-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      
+      .mini-symbol {
+        font-weight: 700;
+        font-size: 12px;
+        color: $text-primary;
+      }
+      
+      .mini-change {
+        font-size: 10px;
+        font-weight: 600;
+        &.positive { color: $success; }
+        &.negative { color: $danger; }
+      }
+    }
+    
+    .mini-price {
+      font-size: 14px;
+      font-weight: 600;
+      color: $text-primary;
+    }
+    
+    .mini-sparkline {
+      margin-top: 6px;
+      height: 24px;
+      svg { width: 100%; height: 100%; }
+    }
+  }
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  
+  .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    .action-symbol {
+      font-weight: 700;
+      font-size: 11px;
+    }
+    
+    .action-label {
+      font-size: 9px;
+      opacity: 0.8;
+    }
+    
+    &.buy {
+      background: $success-light;
+      color: $success;
+      &:hover { background: $success; color: white; }
+    }
+    
+    &.sell {
+      background: $danger-light;
+      color: $danger;
+      &:hover { background: $danger; color: white; }
+    }
+  }
+}
+
+.risk-metrics {
+  .risk-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    
+    &:last-child { margin-bottom: 0; }
+    
+    .risk-label {
+      flex: 0 0 100px;
+      font-size: 11px;
+      color: $text-secondary;
+    }
+    
+    .risk-bar {
+      flex: 1;
+      height: 8px;
+      background: $bg-input;
+      border-radius: 4px;
+      overflow: hidden;
+      
+      .risk-fill {
+        height: 100%;
+        background: $primary;
+        border-radius: 4px;
+        transition: width 0.3s;
+        
+        &.warning { background: $warning; }
+        &.danger { background: $danger; }
+        &.safe { background: $success; }
+      }
+    }
+    
+    .risk-value, .risk-count {
+      flex: 0 0 60px;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 600;
+      color: $text-primary;
+    }
+  }
+}
+
+// Market Depth Section
+.market-depth-section {
+  padding: 0 24px 20px;
+  
+  .depth-panel {
+    background: $bg-card;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: $shadow-sm;
+    border: 1px solid $border-color;
+    
+    .depth-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      
+      h3 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      
+      select {
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid $border-color;
+        font-size: 12px;
+      }
+    }
+    
+    .depth-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 20px;
+      
+      .depth-side {
+        .depth-title {
+          font-size: 11px;
+          font-weight: 700;
+          color: $text-secondary;
+          text-align: center;
+          margin-bottom: 8px;
+        }
+        
+        .depth-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 0;
+          position: relative;
+          font-size: 12px;
+          
+          .depth-qty {
+            width: 50px;
+            font-weight: 600;
+          }
+          
+          .depth-price {
+            width: 80px;
+            font-family: monospace;
+          }
+          
+          .depth-bar {
+            position: absolute;
+            height: 100%;
+            top: 0;
+            opacity: 0.2;
+            border-radius: 4px;
+            z-index: 0;
+            
+            &.bid {
+              background: $success;
+              right: 0;
+            }
+            
+            &.ask {
+              background: $danger;
+              left: 0;
+            }
+          }
+        }
+        
+        &.bids {
+          text-align: right;
+          .depth-row { justify-content: flex-end; }
+        }
+        
+        &.asks {
+          .depth-bar { left: 0; }
+        }
+      }
+      
+      .depth-spread {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0 16px;
+        border-left: 1px solid $border-color;
+        border-right: 1px solid $border-color;
+        
+        .spread-label {
+          font-size: 10px;
+          color: $text-secondary;
+          text-transform: uppercase;
+        }
+        
+        .spread-value {
+          font-size: 16px;
+          font-weight: 700;
+          color: $primary;
+        }
+      }
+    }
+  }
+}
+
+// Hotkeys Panel
+.hotkeys-panel {
+  position: fixed;
+  bottom: 80px;
+  right: 24px;
+  background: $bg-card;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: $shadow-md;
+  border: 1px solid $border-color;
+  z-index: 1000;
+  min-width: 280px;
+  
+  .hotkeys-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    
+    h3 {
+      margin: 0;
+      font-size: 14px;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: $text-secondary;
+      &:hover { color: $text-primary; }
+    }
+  }
+  
+  .hotkeys-grid {
+    display: grid;
+    gap: 8px;
+    
+    .hotkey-item {
+      font-size: 12px;
+      color: $text-secondary;
+      
+      kbd {
+        display: inline-block;
+        padding: 3px 6px;
+        background: $bg-input;
+        border: 1px solid $border-color;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 11px;
+        margin: 0 2px;
+      }
+    }
+  }
+}
+
+.hotkeys-trigger {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: $bg-card;
+  border: 2px solid $border-color;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: $shadow-md;
+  z-index: 999;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: $primary-light;
+    border-color: $primary;
+  }
+}
+
+// Enhanced Footer
+.footer {
+  background: $bg-card;
+  border-top: 1px solid $border-color;
+  padding: 12px 24px;
+  
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: $text-secondary;
+    
+    .footer-brand {
+      font-weight: 600;
+      color: $primary;
+    }
+    
+    .footer-time {
+      font-family: monospace;
+      font-weight: 600;
+    }
+  }
+}

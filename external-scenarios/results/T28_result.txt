@@ -1,0 +1,28 @@
+: Adding FIX 4.0 protocol
+: Adding FIX 4.1 protocol
+: Adding FIX 4.2 protocol
+: Adding FIX 4.3 protocol
+: Adding FIX 4.4 protocol
+: Bulding FIX 4.4 help
+: Pipe (batch/log) interface active at \\.\pipe\minifix
+: (C)2009-2013 Björn Ahlqvist, available free of charge from http://elato.se/minifix/
+: Welcome to Mini-FIX 1.5.25!
+: Pipe interface connected
+: Pipe interface disconnected (code 109)
+: Pipe interface connected
+: Batch Session sequence numbers reset
+: SenderCompId set to MINIFIX
+: TargetCompId set to EXCHANGE
+: Batch Connect 127.0.0.1:9876
+: Pipe interface disconnected (code 109)
+: Connect to 127.0.0.1, resolving..
+: IP address 127.0.0.1 port 9876, connecting..
+: Connected to 127.0.0.1:9876 at 20260416-01:49:42 UTC
+< 8=FIX.4.2|9=66|35=A|49=MINIFIX|56=EXCHANGE|34=1|52=20260416-01:49:42|98=0|108=30|10=146|
+> 8=FIX.4.2|9=70|35=A|34=1|49=EXCHANGE|52=20260416-01:49:42.098|56=MINIFIX|98=0|108=30|10=092|
+: <done waiting, message matches>
+: T28 Logon successful
+< 8=FIX.4.2|9=54|35=5|49=MINIFIX|56=EXCHANGE|34=1|52=20260416-01:49:42|10=106|
+> 8=FIX.4.2|9=58|35=5|34=2|49=EXCHANGE|52=20260416-01:49:42.116|56=MINIFIX|10=053|
+: T28 PASSED - Logon/Logout handshake completed successfully
+: Batch Save to C:\Users\Aarav\OneDrive\Desktop\cmltest\fix-trading-simulator\external-scenarios\results\T28_result.txt

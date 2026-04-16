@@ -1,0 +1,29 @@
+: Adding FIX 4.0 protocol
+: Adding FIX 4.1 protocol
+: Adding FIX 4.2 protocol
+: Adding FIX 4.3 protocol
+: Adding FIX 4.4 protocol
+: Bulding FIX 4.4 help
+: Pipe (batch/log) interface active at \\.\pipe\minifix
+: (C)2009-2013 Björn Ahlqvist, available free of charge from http://elato.se/minifix/
+: Welcome to Mini-FIX 1.5.25!
+: Pipe interface connected
+: Pipe interface disconnected (code 109)
+: Pipe interface connected
+: Batch Session sequence numbers reset
+: SenderCompId set to MINIFIX
+: TargetCompId set to EXCHANGE
+: Batch Connect 127.0.0.1:9876
+: Pipe interface disconnected (code 109)
+: Connect to 127.0.0.1, resolving..
+: IP address 127.0.0.1 port 9876, connecting..
+: Connected to 127.0.0.1:9876 at 20260416-01:48:40 UTC
+< 8=FIX.4.2|9=66|35=A|49=MINIFIX|56=EXCHANGE|34=1|52=20260416-01:48:40|98=0|108=30|10=143|
+> 8=FIX.4.2|9=70|35=A|34=1|49=EXCHANGE|52=20260416-01:48:40.278|56=MINIFIX|98=0|108=30|10=089|
+: <done waiting, message matches>
+< 8=FIX.4.2|9=133|35=D|49=MINIFIX|56=EXCHANGE|34=2|52=20260416-01:48:40|11=903142902|21=1|55=AAPL|54=2|60=20260416-01:48:40|40=2|44=400.00|38=500|59=0|10=069|
+> 8=FIX.4.2|9=219|35=8|34=2|49=EXCHANGE|52=20260416-01:48:40.295|56=MINIFIX|6=0|11=903142902|14=0|17=EXEC-1776303563226|31=0|32=0|37=20260416-071840-612771|38=500|39=0|40=2|44=400|54=2|55=AAPL|59=0|60=20260416-07:18:40.295|150=0|151=500|10=127|
+< 8=FIX.4.2|9=146|35=G|49=MINIFIX|56=EXCHANGE|34=3|52=20260416-01:48:40|41=903142902|11=903142903|21=1|55=AAPL|54=2|60=20260416-01:48:40|40=2|38=300|44=400.00|59=0|10=189|
+> 8=FIX.4.2|9=232|35=8|34=3|49=EXCHANGE|52=20260416-01:48:40.599|56=MINIFIX|6=0|11=903142903|14=0|17=EXEC-1776303563227|31=0|32=0|37=20260416-071840-612771|38=300|39=5|40=2|41=903142902|44=400|54=2|55=AAPL|59=0|60=20260416-07:18:40.599|150=5|151=300|10=002|
+: T18 PASSED - Order quantity modified from 500 to 300 via cancel/replace
+: Batch Save to C:\Users\Aarav\OneDrive\Desktop\cmltest\fix-trading-simulator\external-scenarios\results\T18_result.txt

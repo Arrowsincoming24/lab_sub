@@ -1,0 +1,707 @@
+<!-- Watermark: Aarav Joshi -->
+<!-- Modern Trading Platform UI -->
+<div class="app-wrapper">
+  <!-- Toast Notifications -->
+  <div class="toast-container">
+    <div *ngFor="let toast of toasts" 
+         class="toast" 
+         [class.toast-success]="toast.type === 'success'"
+         [class.toast-error]="toast.type === 'error'"
+         [class.toast-warning]="toast.type === 'warning'"
+         [class.toast-info]="toast.type === 'info'">
+      <div class="toast-icon">
+        <span *ngIf="toast.type === 'success'">✓</span>
+        <span *ngIf="toast.type === 'error'">✕</span>
+        <span *ngIf="toast.type === 'warning'">⚠</span>
+        <span *ngIf="toast.type === 'info'">ℹ</span>
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">{{ toast.title }}</div>
+        <div class="toast-message">{{ toast.message }}</div>
+      </div>
+      <button class="toast-dismiss" (click)="dismissToast(toast.id)">×</button>
+    </div>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+          <polyline points="16 7 22 7 22 13"/>
+        </svg>
+      </div>
+      <span class="brand-text">TradePro</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" (click)="toggleWatchlistPanel()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        <span>Watchlist</span>
+        <span class="nav-badge" *ngIf="watchlist.length">{{ watchlist.length }}</span>
+      </a>
+      <a class="nav-item" (click)="toggleAlertsPanel()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span>Alerts</span>
+        <span class="nav-badge" *ngIf="getActiveAlerts().length">{{ getActiveAlerts().length }}</span>
+      </a>
+      <a class="nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+        <span>Portfolio</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="connection-status" [class.connected]="sessionInfo?.isConnected">
+        <span class="status-dot"></span>
+        <span>{{ sessionInfo?.isConnected ? 'Connected' : 'Disconnected' }}</span>
+      </div>
+      <button class="btn-connect" *ngIf="!sessionInfo?.isConnected" (click)="logon()">Connect</button>
+      <button class="btn-disconnect" *ngIf="sessionInfo?.isConnected" (click)="logout()">Disconnect</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <h1>Dashboard</h1>
+        <span class="header-time">{{ currentTime | date:'MMM d, yyyy h:mm:ss a' }}</span>
+      </div>
+      <div class="header-right">
+        <div class="market-indices">
+          <div class="index-item" *ngFor="let idx of marketIndices.slice(0, 3)">
+            <span class="index-name">{{ idx.name }}</span>
+            <span class="index-price">{{ idx.price | number:'1.2-2' }}</span>
+            <span class="index-change" [class.positive]="idx.change >= 0" [class.negative]="idx.change < 0">
+              {{ idx.change >= 0 ? '+' : '' }}{{ idx.change | number:'1.2-2' }}%
+            </span>
+          </div>
+        </div>
+        <div class="user-menu" *ngIf="currentUser">
+          <div class="user-avatar">{{ currentUser.displayName?.charAt(0) || 'T' }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ currentUser.displayName }}</span>
+            <span class="user-balance">${{ currentUser.balance | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Market Ticker -->
+    <div class="market-ticker">
+      <div class="ticker-content">
+        <div class="ticker-item" *ngFor="let stock of marketData">
+          <span class="ticker-symbol">{{ stock.symbol }}</span>
+          <span class="ticker-price">${{ stock.lastPrice | number:'1.2-2' }}</span>
+          <span class="ticker-change" [class.positive]="stock.changePercent >= 0" [class.negative]="stock.changePercent < 0">
+            {{ stock.changePercent >= 0 ? '+' : '' }}{{ stock.changePercent | number:'1.2-2' }}%
+          </span>
+        </div>
+        <!-- Duplicate for seamless scroll -->
+        <div class="ticker-item" *ngFor="let stock of marketData">
+          <span class="ticker-symbol">{{ stock.symbol }}</span>
+          <span class="ticker-price">${{ stock.lastPrice | number:'1.2-2' }}</span>
+          <span class="ticker-change" [class.positive]="stock.changePercent >= 0" [class.negative]="stock.changePercent < 0">
+            {{ stock.changePercent >= 0 ? '+' : '' }}{{ stock.changePercent | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon portfolio">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Portfolio Value</span>
+          <span class="stat-value">${{ totalPortfolioValue | number:'1.2-2' }}</span>
+          <span class="stat-change" [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">
+            {{ totalUnrealizedPnL >= 0 ? '+' : '' }}${{ totalUnrealizedPnL | number:'1.2-2' }}
+          </span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon orders">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Open Orders</span>
+          <span class="stat-value">{{ getOpenCount() }}</span>
+          <span class="stat-sub">{{ getFilledCount() }} filled today</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon positions">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="20" x2="12" y2="10"/>
+            <line x1="18" y1="20" x2="18" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="16"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Positions</span>
+          <span class="stat-value">{{ positions.length }}</span>
+          <span class="stat-sub">{{ watchlist.length }} watching</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon winrate">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+            <polyline points="16 7 22 7 22 13"/>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <span class="stat-label">Win Rate</span>
+          <span class="stat-value">{{ getWinRate() | number:'1.0-0' }}%</span>
+          <span class="stat-sub">{{ getTotalTrades() }} trades</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid Layout -->
+    <div class="dashboard-grid">
+      <!-- Left Column - Chart & Orders -->
+      <div class="left-column">
+        <!-- Market Cards -->
+        <section class="section market-section">
+          <div class="section-header">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              Live Markets
+            </h2>
+            <div class="section-actions">
+              <button class="btn-icon" (click)="loadMarketData()" title="Refresh">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="market-cards-grid">
+            <app-market-card 
+              *ngFor="let stock of marketData.slice(0, 8)"
+              [symbol]="stock.symbol"
+              [quote]="{
+                symbol: stock.symbol,
+                price: stock.lastPrice,
+                change: stock.change,
+                changePercent: stock.changePercent,
+                high: stock.lastPrice * 1.02,
+                low: stock.lastPrice * 0.98,
+                open: stock.lastPrice - stock.change,
+                previousClose: stock.lastPrice - stock.change,
+                volume: stock.volume,
+                timestamp: currentTime,
+                bid: stock.bid,
+                ask: stock.ask
+              }"
+              [inWatchlist]="isInWatchlist(stock.symbol)"
+              [selected]="newOrder.symbol === stock.symbol"
+              [showActions]="true"
+              (select)="newOrder.symbol = $event; depthSymbol = $event"
+              (toggleWatchlist)="toggleWatchlist($event)"
+              (buy)="quickBuy($event, 100)"
+              (sell)="quickSell($event, 100)">
+            </app-market-card>
+          </div>
+        </section>
+
+        <!-- Orders Table -->
+        <section class="section orders-section">
+          <div class="orders-controls">
+            <div class="orders-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="text"
+                [(ngModel)]="orderSearchQuery"
+                placeholder="Search by symbol, order ID, side or status"
+              >
+            </div>
+
+            <div class="orders-filter-group">
+              <select [(ngModel)]="orderStatusFilter">
+                <option *ngFor="let status of orderStatusOptions" [value]="status">{{ status }}</option>
+              </select>
+              <button class="btn-clear-filters" (click)="clearOrderFilters()">Reset</button>
+            </div>
+
+            <div class="orders-count">
+              Showing {{ filteredOrders.length }} / {{ orders.length }}
+            </div>
+          </div>
+
+          <app-orders-table 
+            [orders]="filteredOrders"
+            (orderCancel)="cancelOrder($event.clOrdId)"
+            (export)="exportTradesToCSV()">
+          </app-orders-table>
+        </section>
+      </div>
+
+      <!-- Right Column - Order Form & News -->
+      <div class="right-column">
+        <!-- Order Form -->
+        <section class="section order-section">
+          <app-order-form
+            [symbol]="newOrder.symbol"
+            [allowedSymbols]="allSymbols"
+            [quote]="{
+              symbol: newOrder.symbol,
+              price: getMarketPrice(newOrder.symbol),
+              change: 0,
+              changePercent: getMarketChangePercent(newOrder.symbol),
+              high: 0,
+              low: 0,
+              open: 0,
+              previousClose: 0,
+              volume: 0,
+              timestamp: currentTime
+            }"
+            [balance]="currentUser?.balance || 100000"
+            (orderSubmit)="onOrderSubmit($event)">
+          </app-order-form>
+        </section>
+
+        <section class="section staged-option-section" *ngIf="stagedOptionOrder">
+          <div class="section-header compact">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"/>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+              </svg>
+              Staged Option Order
+            </h2>
+          </div>
+
+          <div class="staged-order-grid">
+            <div><span>Symbol</span><strong>{{ stagedOptionOrder.symbol }}</strong></div>
+            <div><span>Side</span><strong>{{ getSideLabel(stagedOptionOrder.side) }}</strong></div>
+            <div><span>Qty</span><strong>{{ stagedOptionOrder.quantity }}</strong></div>
+            <div><span>Limit</span><strong>${{ stagedOptionOrder.price | number:'1.2-2' }}</strong></div>
+            <div><span>Underlying</span><strong>{{ stagedOptionOrder.underlying }}</strong></div>
+            <div><span>Strike</span><strong>${{ stagedOptionOrder.strike | number:'1.0-0' }}</strong></div>
+            <div><span>Type</span><strong>{{ stagedOptionOrder.optionType }}</strong></div>
+            <div><span>Expiry</span><strong>{{ formatOptionExpiry(stagedOptionOrder.expiry) }}</strong></div>
+          </div>
+
+          <div class="staged-order-actions">
+            <button type="button" class="btn-stage-apply" (click)="applyStagedOptionToForm()">Apply To Form</button>
+            <button type="button" class="btn-stage-submit" (click)="submitStagedOptionOrder()">Submit Now</button>
+            <button type="button" class="btn-stage-clear" (click)="clearStagedOptionOrder()">Clear</button>
+          </div>
+        </section>
+
+        <!-- Order Book -->
+        <section class="section depth-section">
+          <div class="section-header">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/>
+                <line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+              Order Book
+            </h2>
+            <select class="depth-select" [(ngModel)]="depthSymbol" (change)="onDepthSymbolChange()">
+              <option *ngFor="let sym of quickSymbols" [value]="sym">{{ sym }}</option>
+            </select>
+          </div>
+          <div class="order-book">
+            <div class="order-book-header">
+              <span>Price</span>
+              <span>Size</span>
+              <span>Total</span>
+            </div>
+            <div class="asks">
+              <div class="order-row ask" *ngFor="let ask of getAsks().reverse()">
+                <span class="price">${{ ask.price | number:'1.2-2' }}</span>
+                <span class="size">{{ ask.qty }}</span>
+                <div class="depth-bar ask" [style.width]="ask.percent + '%'"></div>
+              </div>
+            </div>
+            <div class="spread-row">
+              <span class="spread-label">Spread</span>
+              <span class="spread-value">${{ getSpread() | number:'1.4-4' }}</span>
+            </div>
+            <div class="bids">
+              <div class="order-row bid" *ngFor="let bid of getBids()">
+                <span class="price">${{ bid.price | number:'1.2-2' }}</span>
+                <span class="size">{{ bid.qty }}</span>
+                <div class="depth-bar bid" [style.width]="bid.percent + '%'"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Options Chain -->
+        <section class="section options-chain-section" *ngIf="optionUnderlyingChoices.length > 0">
+          <div class="section-header">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 3v18h18"/>
+                <path d="M7 15l4-4 3 3 5-6"/>
+              </svg>
+              Options Chain
+            </h2>
+          </div>
+
+          <div class="options-chain-controls">
+            <select [(ngModel)]="selectedOptionUnderlying" (change)="onOptionUnderlyingChange()">
+              <option *ngFor="let sym of optionUnderlyingChoices" [value]="sym">{{ sym }}</option>
+            </select>
+            <select [(ngModel)]="selectedOptionExpiry" (change)="onOptionExpiryChange()">
+              <option value="ALL">All Expiries</option>
+              <option *ngFor="let expiry of optionExpiryChoices" [value]="expiry">{{ formatOptionExpiry(expiry) }}</option>
+            </select>
+            <select [(ngModel)]="optionStrikeWindow" (change)="onOptionStrikeWindowChange()">
+              <option *ngFor="let choice of optionStrikeWindowChoices" [ngValue]="choice.value">{{ choice.label }}</option>
+            </select>
+            <select [(ngModel)]="optionChainSort" (change)="onOptionChainSortChange()">
+              <option value="strike">Sort: Strike</option>
+              <option value="change">Sort: Volatility</option>
+              <option value="volume">Sort: Volume</option>
+            </select>
+          </div>
+
+          <div class="option-quantity-row">
+            <span class="qty-label">Quick Qty</span>
+            <div class="qty-stepper">
+              <button type="button" (click)="incrementOptionQuantity(-1)">-</button>
+              <span>{{ optionQuickQuantity }}</span>
+              <button type="button" (click)="incrementOptionQuantity(1)">+</button>
+            </div>
+          </div>
+
+          <div class="options-spot-row" *ngIf="selectedOptionUnderlying">
+            <span class="spot-label">Spot</span>
+            <span class="spot-value">{{ selectedOptionUnderlying }} ${{ getMarketPrice(selectedOptionUnderlying) | number:'1.2-2' }}</span>
+          </div>
+
+          <div class="options-heatmap" *ngIf="optionHeatmapRows.length > 0">
+            <div class="heatmap-header">
+              <span class="heatmap-title">Chain Heatmap</span>
+              <span class="heatmap-subtitle">Signal from move pressure and flow</span>
+            </div>
+            <div class="heatmap-grid">
+              <div class="heatmap-row heatmap-label-row">
+                <div class="heatmap-strike-cell">Strike</div>
+                <div class="heatmap-expiry-cell" *ngFor="let expiry of optionHeatmapExpiries">{{ formatOptionExpiry(expiry) }}</div>
+              </div>
+              <div class="heatmap-row" *ngFor="let row of optionHeatmapRows">
+                <div class="heatmap-strike-cell">${{ row.strike | number:'1.0-0' }}</div>
+                <div
+                  class="heatmap-data-cell"
+                  *ngFor="let cell of row.cells"
+                  [style.background]="getOptionHeatmapCellStyle(cell)">
+                  <span>{{ cell.absMove | number:'1.2-2' }}%</span>
+                  <small>V {{ cell.volume }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="options-chain-list" *ngIf="optionChainRows.length > 0; else noOptionsForFilter">
+            <div
+              class="options-chain-row"
+              *ngFor="let row of optionChainRows"
+              [class.selected]="selectedOptionStrike === row.strike">
+
+              <div class="option-leg call" [class.itm]="isOptionStrikeInTheMoney(row.strike, 'CALL')">
+                <button type="button" class="leg-select" (click)="selectOptionSymbol(row.callSymbol)">{{ getOptionContractLabel(row.callSymbol) }}</button>
+                <div class="leg-price" *ngIf="row.callQuote; else noCallQuote">
+                  ${{ row.callQuote.lastPrice | number:'1.2-2' }}
+                  <span class="leg-change" [class.positive]="row.callQuote.changePercent >= 0" [class.negative]="row.callQuote.changePercent < 0">
+                    {{ row.callQuote.changePercent >= 0 ? '+' : '' }}{{ row.callQuote.changePercent | number:'1.2-2' }}%
+                  </span>
+                </div>
+                <div class="leg-micro" *ngIf="row.callQuote">
+                  <span>Mid ${{ getOptionMid(row.callQuote) | number:'1.2-2' }}</span>
+                  <span>Spr ${{ getOptionSpreadFromQuote(row.callQuote) | number:'1.2-2' }}</span>
+                  <span>Δ {{ getOptionDelta(row.callSymbol) | number:'1.2-2' }}</span>
+                  <span>Θ {{ getOptionTheta(row.callSymbol) | number:'1.3-3' }}</span>
+                </div>
+                <ng-template #noCallQuote>
+                  <div class="leg-price muted">No quote</div>
+                </ng-template>
+                <div class="leg-actions">
+                  <button class="btn-leg stage" (click)="stageOptionOrder(row.callSymbol, '1'); $event.stopPropagation()" [disabled]="!row.callSymbol">Stage</button>
+                  <button class="btn-leg buy" (click)="quickBuyOption(row.callSymbol); $event.stopPropagation()" [disabled]="!row.callSymbol">Buy</button>
+                  <button class="btn-leg sell" (click)="quickSellOption(row.callSymbol); $event.stopPropagation()" [disabled]="!row.callSymbol">Sell</button>
+                </div>
+              </div>
+
+              <button type="button" class="strike-cell" (click)="selectOptionStrike(row.strike)">
+                <span class="strike-label">Strike</span>
+                <span class="strike-value">${{ row.strike | number:'1.0-0' }}</span>
+              </button>
+
+              <div class="option-leg put" [class.itm]="isOptionStrikeInTheMoney(row.strike, 'PUT')">
+                <button type="button" class="leg-select" (click)="selectOptionSymbol(row.putSymbol)">{{ getOptionContractLabel(row.putSymbol) }}</button>
+                <div class="leg-price" *ngIf="row.putQuote; else noPutQuote">
+                  ${{ row.putQuote.lastPrice | number:'1.2-2' }}
+                  <span class="leg-change" [class.positive]="row.putQuote.changePercent >= 0" [class.negative]="row.putQuote.changePercent < 0">
+                    {{ row.putQuote.changePercent >= 0 ? '+' : '' }}{{ row.putQuote.changePercent | number:'1.2-2' }}%
+                  </span>
+                </div>
+                <div class="leg-micro" *ngIf="row.putQuote">
+                  <span>Mid ${{ getOptionMid(row.putQuote) | number:'1.2-2' }}</span>
+                  <span>Spr ${{ getOptionSpreadFromQuote(row.putQuote) | number:'1.2-2' }}</span>
+                  <span>Δ {{ getOptionDelta(row.putSymbol) | number:'1.2-2' }}</span>
+                  <span>Θ {{ getOptionTheta(row.putSymbol) | number:'1.3-3' }}</span>
+                </div>
+                <ng-template #noPutQuote>
+                  <div class="leg-price muted">No quote</div>
+                </ng-template>
+                <div class="leg-actions">
+                  <button class="btn-leg stage" (click)="stageOptionOrder(row.putSymbol, '2'); $event.stopPropagation()" [disabled]="!row.putSymbol">Stage</button>
+                  <button class="btn-leg buy" (click)="quickBuyOption(row.putSymbol); $event.stopPropagation()" [disabled]="!row.putSymbol">Buy</button>
+                  <button class="btn-leg sell" (click)="quickSellOption(row.putSymbol); $event.stopPropagation()" [disabled]="!row.putSymbol">Sell</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noOptionsForFilter>
+            <div class="options-empty">No option contracts available for current filters.</div>
+          </ng-template>
+        </section>
+
+        <!-- Positions -->
+        <section class="section positions-section" *ngIf="positions.length > 0">
+          <div class="section-header">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              Positions
+            </h2>
+          </div>
+          <div class="positions-list">
+            <app-position-card 
+              *ngFor="let pos of positions.slice(0, 3)"
+              [position]="pos"
+              (select)="newOrder.symbol = $event"
+              (buy)="quickBuy($event, 100)"
+              (sell)="quickSell($event, 100)">
+            </app-position-card>
+          </div>
+        </section>
+
+        <!-- News Feed -->
+        <section class="section news-section">
+          <div class="section-header">
+            <h2>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                <path d="M18 14h-8"/>
+                <path d="M15 18h-5"/>
+                <path d="M10 6h8v4h-8V6Z"/>
+              </svg>
+              Market News
+            </h2>
+          </div>
+          <div class="news-list">
+            <app-news-card 
+              *ngFor="let article of newsArticles.slice(0, 4)"
+              [news]="{
+                id: article.title,
+                headline: article.title,
+                summary: '',
+                source: article.source,
+                url: article.url,
+                datetime: article.publishedAt,
+                related: article.relatedSymbols,
+                sentiment: article.sentiment === 'bullish' ? 'positive' : article.sentiment === 'bearish' ? 'negative' : 'neutral'
+              }"
+              (symbolSelect)="newOrder.symbol = $event">
+            </app-news-card>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Commodities Trading Section -->
+    <section class="commodities-section">
+      <div class="section-header">
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          Commodities & Precious Metals Trading
+        </h2>
+        <span class="new-badge">NEW</span>
+      </div>
+      <app-broker-commodities></app-broker-commodities>
+    </section>
+  </main>
+
+  <!-- Watchlist Slide Panel -->
+  <div class="slide-panel" [class.open]="showWatchlistPanel">
+    <button type="button" class="panel-backdrop" aria-label="Close watchlist panel" (click)="showWatchlistPanel = false"></button>
+    <div class="panel-content">
+      <div class="panel-header">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          Watchlist
+        </h3>
+        <button class="btn-close" (click)="showWatchlistPanel = false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="panel-body">
+        <div class="watchlist-empty" *ngIf="watchlist.length === 0">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          <p>No symbols in watchlist</p>
+          <span>Click the star on any stock to add</span>
+        </div>
+        <div class="watchlist-items" *ngIf="watchlist.length > 0">
+          <div class="watchlist-item" *ngFor="let sym of watchlist">
+            <div class="item-left">
+              <span class="symbol">{{ sym }}</span>
+              <span class="price">${{ getStockPrice(sym) | number:'1.2-2' }}</span>
+            </div>
+            <div class="item-right">
+              <span class="change" [class.positive]="getStockChange(sym) >= 0" [class.negative]="getStockChange(sym) < 0">
+                {{ getStockChange(sym) >= 0 ? '+' : '' }}{{ getStockChange(sym) | number:'1.2-2' }}%
+              </span>
+              <button class="btn-remove" (click)="toggleWatchlist(sym)">×</button>
+            </div>
+          </div>
+        </div>
+        <div class="add-symbols">
+          <h4>Popular Symbols</h4>
+          <div class="symbol-chips">
+            <button *ngFor="let sym of quickSymbols" 
+                    class="chip"
+                    [class.active]="isInWatchlist(sym)"
+                    (click)="toggleWatchlist(sym)">
+              {{ sym }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts Slide Panel -->
+  <div class="slide-panel" [class.open]="showAlertsPanel">
+    <button type="button" class="panel-backdrop" aria-label="Close alerts panel" (click)="showAlertsPanel = false"></button>
+    <div class="panel-content">
+      <div class="panel-header">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          Price Alerts
+        </h3>
+        <button class="btn-close" (click)="showAlertsPanel = false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="panel-body">
+        <div class="alert-form">
+          <h4>Create New Alert</h4>
+          <div class="form-row">
+            <select [(ngModel)]="newAlert.symbol">
+              <option *ngFor="let sym of quickSymbols" [value]="sym">{{ sym }}</option>
+            </select>
+            <select [(ngModel)]="newAlert.condition">
+              <option value="above">Above</option>
+              <option value="below">Below</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="price-input">
+              <span>$</span>
+              <input type="number" [(ngModel)]="newAlert.targetPrice" step="0.01">
+            </div>
+            <button class="btn-add" (click)="addPriceAlert()">Add Alert</button>
+          </div>
+        </div>
+        
+        <div class="alerts-list" *ngIf="getActiveAlerts().length > 0">
+          <h4>Active Alerts</h4>
+          <div class="alert-item" *ngFor="let alert of getActiveAlerts()">
+            <div class="alert-info">
+              <span class="symbol">{{ alert.symbol }}</span>
+              <span class="condition">{{ alert.condition }}</span>
+              <span class="price">${{ alert.targetPrice | number:'1.2-2' }}</span>
+            </div>
+            <button class="btn-remove" (click)="removeAlert(alert.id)">×</button>
+          </div>
+        </div>
+        
+        <div class="alerts-list triggered" *ngIf="getTriggeredAlerts().length > 0">
+          <h4>
+            Triggered
+            <button class="btn-clear" (click)="clearTriggeredAlerts()">Clear All</button>
+          </h4>
+          <div class="alert-item triggered" *ngFor="let alert of getTriggeredAlerts()">
+            <div class="alert-info">
+              <span class="symbol">{{ alert.symbol }}</span>
+              <span class="condition">{{ alert.condition }}</span>
+              <span class="price">${{ alert.targetPrice | number:'1.2-2' }}</span>
+            </div>
+            <button class="btn-remove" (click)="removeAlert(alert.id)">×</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

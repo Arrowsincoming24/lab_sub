@@ -1,0 +1,223 @@
+<!-- Watermark: Aarav Joshi -->
+<div class="commodities-panel">
+  <!-- Header -->
+  <div class="panel-header">
+    <div class="header-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 3v18h18"/>
+        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/>
+      </svg>
+      <h3>Commodities Trading</h3>
+    </div>
+    
+    <div class="header-stats">
+      <div class="stat gainers">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+        </svg>
+        {{ marketSummary.gainers }}
+      </div>
+      <div class="stat losers">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+        </svg>
+        {{ marketSummary.losers }}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Category Tabs -->
+  <div class="category-tabs">
+    <button 
+      class="tab-btn" 
+      [class.active]="selectedCategory === 'all'"
+      (click)="selectCategory('all')">
+      <span class="tab-icon">📊</span>
+      All
+    </button>
+    <button 
+      *ngFor="let category of categories"
+      class="tab-btn" 
+      [class.active]="selectedCategory === category.id"
+      [style.--tab-color]="category.color"
+      (click)="selectCategory(category.id)">
+      <span class="tab-icon">{{ category.icon }}</span>
+      {{ category.name }}
+    </button>
+  </div>
+  
+  <!-- Search -->
+  <div class="search-bar">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input 
+      type="text" 
+      placeholder="Search commodities..." 
+      [(ngModel)]="searchQuery">
+  </div>
+  
+  <!-- Commodities List -->
+  <div class="commodities-list">
+    <div class="list-header">
+      <div class="col-symbol" (click)="toggleSort('symbol')">
+        Symbol
+        <svg *ngIf="sortBy === 'symbol'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline [attr.points]="sortDirection === 'asc' ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
+        </svg>
+      </div>
+      <div class="col-price" (click)="toggleSort('price')">
+        Price
+        <svg *ngIf="sortBy === 'price'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline [attr.points]="sortDirection === 'asc' ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
+        </svg>
+      </div>
+      <div class="col-change" (click)="toggleSort('change')">
+        Change
+        <svg *ngIf="sortBy === 'change'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline [attr.points]="sortDirection === 'asc' ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
+        </svg>
+      </div>
+      <div class="col-volume" (click)="toggleSort('volume')">
+        Vol
+        <svg *ngIf="sortBy === 'volume'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline [attr.points]="sortDirection === 'asc' ? '18 15 12 9 6 15' : '6 9 12 15 18 9'"/>
+        </svg>
+      </div>
+    </div>
+    
+    <div class="list-body">
+      <div 
+        *ngFor="let commodity of getFilteredCommodities()"
+        class="commodity-row"
+        [class.selected]="selectedCommodity?.symbol === commodity.symbol"
+        [class.positive]="commodity.change > 0"
+        [class.negative]="commodity.change < 0"
+        (click)="selectCommodity(commodity)">
+        <div class="col-symbol">
+          <span class="symbol-badge" [style.border-color]="getCategoryColor(commodity.category)">
+            {{ commodity.symbol }}
+          </span>
+          <span class="symbol-name">{{ commodity.name }}</span>
+        </div>
+        <div class="col-price">
+          <span class="price-value">{{ formatPrice(commodity.price, commodity.symbol) }}</span>
+          <span class="price-unit">{{ commodity.unit }}</span>
+        </div>
+        <div class="col-change" [class.positive]="commodity.change > 0" [class.negative]="commodity.change < 0">
+          <span class="change-value">
+            {{ commodity.change >= 0 ? '+' : '' }}{{ commodity.change.toFixed(2) }}
+          </span>
+          <span class="change-percent">
+            ({{ commodity.changePercent >= 0 ? '+' : '' }}{{ commodity.changePercent.toFixed(2) }}%)
+          </span>
+        </div>
+        <div class="col-volume">{{ formatVolume(commodity.volume) }}</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Selected Commodity Detail -->
+  <div class="commodity-detail" *ngIf="selectedCommodity">
+    <div class="detail-header">
+      <div class="detail-symbol">{{ selectedCommodity.symbol }}</div>
+      <div class="detail-name">{{ selectedCommodity.name }}</div>
+    </div>
+    
+    <div class="detail-price">
+      <span class="current-price">{{ formatPrice(selectedCommodity.price, selectedCommodity.symbol) }}</span>
+      <span class="price-change" [class.positive]="selectedCommodity.change > 0" [class.negative]="selectedCommodity.change < 0">
+        {{ selectedCommodity.change >= 0 ? '+' : '' }}{{ selectedCommodity.change.toFixed(2) }}
+        ({{ selectedCommodity.changePercent >= 0 ? '+' : '' }}{{ selectedCommodity.changePercent.toFixed(2) }}%)
+      </span>
+    </div>
+    
+    <div class="detail-stats">
+      <div class="stat-item">
+        <span class="stat-label">Bid</span>
+        <span class="stat-value bid">{{ formatPrice(selectedCommodity.bid, selectedCommodity.symbol) }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Ask</span>
+        <span class="stat-value ask">{{ formatPrice(selectedCommodity.ask, selectedCommodity.symbol) }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">High</span>
+        <span class="stat-value">{{ formatPrice(selectedCommodity.high, selectedCommodity.symbol) }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Low</span>
+        <span class="stat-value">{{ formatPrice(selectedCommodity.low, selectedCommodity.symbol) }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Volume</span>
+        <span class="stat-value">{{ formatVolume(selectedCommodity.volume) }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Open Int</span>
+        <span class="stat-value">{{ formatVolume(selectedCommodity.openInterest) }}</span>
+      </div>
+    </div>
+    
+    <!-- Quick Trade Form -->
+    <div class="trade-form">
+      <div class="side-buttons">
+        <button 
+          class="side-btn buy" 
+          [class.active]="tradeForm.side === 'BUY'"
+          (click)="setSide('BUY')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          </svg>
+          BUY
+        </button>
+        <button 
+          class="side-btn sell" 
+          [class.active]="tradeForm.side === 'SELL'"
+          (click)="setSide('SELL')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+          </svg>
+          SELL
+        </button>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" [(ngModel)]="tradeForm.quantity" min="1" step="1">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select [(ngModel)]="tradeForm.orderType">
+            <option value="LIMIT">Limit</option>
+            <option value="MARKET">Market</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-group" *ngIf="tradeForm.orderType === 'LIMIT'">
+        <label>Limit Price</label>
+        <input type="number" [(ngModel)]="tradeForm.price" [step]="0.01">
+      </div>
+      
+      <div class="estimated-total">
+        <span>Estimated Total</span>
+        <span class="total-value">${{ getEstimatedTotal() | number:'1.2-2' }}</span>
+      </div>
+      
+      <button 
+        class="submit-btn" 
+        [class.buy]="tradeForm.side === 'BUY'" 
+        [class.sell]="tradeForm.side === 'SELL'"
+        [disabled]="tradeSubmitting"
+        (click)="submitTrade()">
+        {{ tradeSubmitting ? 'Submitting...' : (tradeForm.side + ' ' + selectedCommodity.symbol) }}
+      </button>
+
+      <div class="trade-feedback success" *ngIf="tradeSuccess">{{ tradeSuccess }}</div>
+      <div class="trade-feedback error" *ngIf="tradeError">{{ tradeError }}</div>
+    </div>
+  </div>
+</div>

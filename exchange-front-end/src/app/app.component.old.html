@@ -1,0 +1,847 @@
+<!-- Watermark: Aarav Joshi -->
+<div class="app-container">
+  <header class="header">
+    <div class="header-left">
+      <h1>{{ title }}</h1>
+      <div class="system-health">
+        <span class="health-dot" [class.healthy]="systemHealth.healthy"></span>
+        <span class="health-text">{{ systemHealth.healthy ? 'All Systems Operational' : 'System Issues' }}</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="session-status" *ngIf="sessionStatus">
+        <span class="status-indicator" [class.connected]="sessionStatus?.connected">
+          <span class="status-dot"></span>
+          {{ sessionStatus?.connected ? 'FIX Connected' : 'Disconnected' }}
+        </span>
+        <span class="session-info" *ngIf="sessionStatus?.sessionId">
+          {{ sessionStatus.sessionId }}
+        </span>
+      </div>
+      <div class="header-time">{{ currentTime | date:'HH:mm:ss' }}</div>
+    </div>
+  </header>
+  
+  <!-- Market Summary Banner -->
+  <div class="market-summary-banner">
+    <div class="summary-item">
+      <span class="summary-label">Total Volume</span>
+      <span class="summary-value">{{ getTotalVolume() | number:'1.0-0' }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Orders Today</span>
+      <span class="summary-value">{{ orders.length }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Filled Orders</span>
+      <span class="summary-value positive">{{ getFilledCount() }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Fill Rate</span>
+      <span class="summary-value">{{ getFillRate() | number:'1.1-1' }}%</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Avg Latency</span>
+      <span class="summary-value">{{ getAvgLatency() }}ms</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Market Status</span>
+      <span class="summary-value market-open">● OPEN</span>
+    </div>
+  </div>
+  
+  <!-- Dashboard Stats -->
+  <div class="dashboard-stats">
+    <div class="stat-item">
+      <div class="stat-icon">💰</div>
+      <div class="stat-content">
+        <div class="stat-label">Portfolio Value</div>
+        <div class="stat-value">${{ totalPortfolioValue | number:'1.2-2' }}</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">📈</div>
+      <div class="stat-content">
+        <div class="stat-label">Unrealized P&L</div>
+        <div class="stat-value" [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">
+          {{ totalUnrealizedPnL >= 0 ? '+' : '' }}${{ totalUnrealizedPnL | number:'1.2-2' }}
+        </div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">💵</div>
+      <div class="stat-content">
+        <div class="stat-label">Realized P&L</div>
+        <div class="stat-value" [class.positive]="totalRealizedPnL >= 0" [class.negative]="totalRealizedPnL < 0">
+          {{ totalRealizedPnL >= 0 ? '+' : '' }}${{ totalRealizedPnL | number:'1.2-2' }}
+        </div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">📊</div>
+      <div class="stat-content">
+        <div class="stat-label">Positions</div>
+        <div class="stat-value">{{ positions.length }}</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">⏳</div>
+      <div class="stat-content">
+        <div class="stat-label">Open Orders</div>
+        <div class="stat-value">{{ getOpenCount() }}</div>
+      </div>
+    </div>
+  </div>
+  
+  <main class="main-content">
+    <!-- Market Data Panel - Categorized -->
+    <div class="market-data-section panel">
+      <h2>Watchlist <span class="stock-count">({{ allStocks.length }})</span></h2>
+      
+      <div class="watchlist-search">
+        <input type="text" placeholder="Search symbols..." [(ngModel)]="searchQuery" (input)="filterStocks()">
+      </div>
+      
+      <div class="scrollable">
+        <div class="category-container" *ngFor="let category of filteredCategories">
+          <div class="category-header" (click)="toggleCategory(category)">
+            <span class="category-icon">{{ category.expanded ? '▼' : '►' }}</span>
+            <span class="category-name">{{ category.name }}</span>
+            <span class="category-count">{{ category.stocks.length }}</span>
+          </div>
+          <div class="market-data-grid" *ngIf="category.expanded">
+            <div class="stock-card" *ngFor="let stock of category.stocks" 
+                 [class.selected]="newOrder.symbol === stock.symbol"
+                 (click)="selectStock(stock); $event.stopPropagation()">
+              <div class="stock-info">
+                <span class="stock-symbol">{{ stock.symbol }}</span>
+                <span class="stock-name">{{ stock.name }}</span>
+              </div>
+              <span class="stock-price">${{ stock.price | number:'1.2-2' }}</span>
+              <span class="stock-change" [class.positive]="stock.change >= 0" [class.negative]="stock.change < 0">
+                {{ stock.change >= 0 ? '+' : '' }}{{ stock.changePercent | number:'1.2-2' }}%
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="orders-section panel">
+      <div class="section-header">
+        <h2>Order Book</h2>
+        <button class="btn-refresh" (click)="refreshOrders()">↻ Refresh</button>
+      </div>
+      
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+      <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+      <div class="loading" *ngIf="loading">Loading orders...</div>
+      
+      <div class="orders-table-container" *ngIf="!loading">
+        <table class="orders-table" *ngIf="orders.length > 0">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Symbol</th>
+              <th>Side</th>
+              <th class="numeric">Qty</th>
+              <th class="numeric">Price</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th class="numeric">Filled</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of orders">
+              <td>{{ order.orderRefNumber || order.clOrdId }}</td>
+              <td class="symbol">{{ order.symbol }}</td>
+              <td [class]="getSideClass(order.side)">{{ getSideLabel(order.side) }}</td>
+              <td class="numeric">{{ order.quantity | number }}</td>
+              <td class="numeric">${{ order.price | number:'1.2-2' }}</td>
+              <td>{{ order.orderType || 'LIMIT' }}</td>
+              <td [class]="getStatusClass(order.status)">{{ order.status }}</td>
+              <td class="numeric">{{ order.filledQty || 0 }}</td>
+              <td class="time">{{ order.createdAt | date:'HH:mm:ss' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="no-orders" *ngIf="orders.length === 0">
+          <p>No orders yet. Submit an order or wait for FIX messages from Broker.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Entry Panel -->
+    <div class="order-form-section panel">
+      <h2>New Order</h2>
+      
+      <div class="selected-symbol" *ngIf="getSelectedStock()">
+        <div class="symbol-header">
+          <span class="symbol-name">{{ getSelectedStock()?.symbol }}</span>
+          <span class="symbol-price">${{ getSelectedStock()?.price | number:'1.2-2' }}</span>
+        </div>
+        <div class="symbol-stats">
+          <span><span class="label">Bid:</span> ${{ getSelectedStock()?.bid | number:'1.2-2' }}</span>
+          <span><span class="label">Ask:</span> ${{ getSelectedStock()?.ask | number:'1.2-2' }}</span>
+        </div>
+      </div>
+      
+      <div class="order-form">
+        <div class="side-selector">
+          <button [class.active-buy]="newOrder.side === '1'" (click)="newOrder.side = '1'">BUY</button>
+          <button [class.active-sell]="newOrder.side === '2'" (click)="newOrder.side = '2'">SELL</button>
+        </div>
+        
+        <div class="form-group">
+          <label>Symbol</label>
+          <select [(ngModel)]="newOrder.symbol" (change)="onSymbolChange()">
+            <optgroup *ngFor="let cat of stockCategories" [label]="cat.name">
+              <option *ngFor="let stock of cat.stocks" [value]="stock.symbol">{{ stock.symbol }}</option>
+            </optgroup>
+          </select>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Quantity</label>
+            <input type="number" [(ngModel)]="newOrder.quantity" min="1">
+          </div>
+          <div class="form-group">
+            <label>Price</label>
+            <input type="number" [(ngModel)]="newOrder.price" step="0.01" min="0.01">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Order Type</label>
+            <select [(ngModel)]="newOrder.orderType">
+              <option value="LIMIT">LIMIT</option>
+              <option value="MARKET">MARKET</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Time in Force</label>
+            <select [(ngModel)]="newOrder.timeInForce">
+              <option value="DAY">DAY</option>
+              <option value="GTC">GTC</option>
+              <option value="IOC">IOC</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="order-summary">
+          <div class="summary-row">
+            <span class="label">Side</span>
+            <span class="value" [style.color]="newOrder.side === '1' ? '#3fb950' : '#f85149'">{{ newOrder.side === '1' ? 'BUY' : 'SELL' }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Quantity</span>
+            <span class="value">{{ newOrder.quantity | number }}</span>
+          </div>
+          <div class="summary-row total">
+            <span class="label">Est. Value</span>
+            <span class="value">${{ (newOrder.quantity * newOrder.price) | number:'1.2-2' }}</span>
+          </div>
+        </div>
+        
+        <button class="btn-submit" [class.buy]="newOrder.side === '1'" [class.sell]="newOrder.side === '2'" (click)="submitOrder()">
+          {{ newOrder.side === '1' ? 'BUY' : 'SELL' }} {{ newOrder.symbol }}
+        </button>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Positions Section -->
+  <section class="positions-section" *ngIf="positions.length > 0">
+    <div class="panel">
+      <h2>Positions</h2>
+      <table class="positions-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th class="numeric">Qty</th>
+            <th class="numeric">Avg Price</th>
+            <th class="numeric">Current</th>
+            <th class="numeric">Market Value</th>
+            <th class="numeric">Unrealized P&L</th>
+            <th class="numeric">%</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pos of positions">
+            <td class="symbol">{{ pos.symbol }}</td>
+            <td class="numeric">{{ pos.quantity | number }}</td>
+            <td class="numeric">${{ pos.avgPrice | number:'1.2-2' }}</td>
+            <td class="numeric">${{ pos.currentPrice | number:'1.2-2' }}</td>
+            <td class="numeric">${{ pos.marketValue | number:'1.2-2' }}</td>
+            <td class="numeric" [class.positive]="pos.unrealizedPnL >= 0" [class.negative]="pos.unrealizedPnL < 0">
+              {{ pos.unrealizedPnL >= 0 ? '+' : '' }}${{ pos.unrealizedPnL | number:'1.2-2' }}
+            </td>
+            <td class="numeric" [class.positive]="pos.unrealizedPnLPercent >= 0" [class.negative]="pos.unrealizedPnLPercent < 0">
+              {{ pos.unrealizedPnLPercent >= 0 ? '+' : '' }}{{ pos.unrealizedPnLPercent | number:'1.2-2' }}%
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td colspan="4">Total</td>
+            <td class="numeric">${{ totalPortfolioValue | number:'1.2-2' }}</td>
+            <td class="numeric" [class.positive]="totalUnrealizedPnL >= 0" [class.negative]="totalUnrealizedPnL < 0">
+              {{ totalUnrealizedPnL >= 0 ? '+' : '' }}${{ totalUnrealizedPnL | number:'1.2-2' }}
+            </td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+  
+  <!-- Trade Blotter -->
+  <section class="blotter-section" *ngIf="executions.length > 0">
+    <div class="panel">
+      <div class="panel-header">
+        <h2>📋 Recent Executions</h2>
+        <span class="execution-count">{{ executions.length }} trades</span>
+      </div>
+      <table class="blotter-table">
+        <thead>
+          <tr>
+            <th>Exec ID</th>
+            <th>Time</th>
+            <th>Symbol</th>
+            <th>Side</th>
+            <th class="numeric">Qty</th>
+            <th class="numeric">Price</th>
+            <th class="numeric">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let exec of executions">
+            <td>{{ exec.execId }}</td>
+            <td class="time">{{ exec.time | date:'HH:mm:ss' }}</td>
+            <td class="symbol">{{ exec.symbol }}</td>
+            <td [class]="getSideClass(exec.side)">{{ getSideLabel(exec.side) }}</td>
+            <td class="numeric">{{ exec.quantity | number }}</td>
+            <td class="numeric">${{ exec.price | number:'1.2-2' }}</td>
+            <td class="numeric">${{ exec.quantity * exec.price | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  
+  <!-- Order Book Visualization - Enhanced -->
+  <section class="orderbook-section">
+    <div class="orderbook-main-panel">
+      <div class="panel-header orderbook-header">
+        <div class="header-left">
+          <h2>📊 Live Order Book</h2>
+          <select class="symbol-select" [(ngModel)]="selectedOrderBookSymbol" (ngModelChange)="onOrderBookSymbolChange()">
+            <optgroup *ngFor="let cat of getOrderBookCategories()" [label]="cat.name">
+              <option *ngFor="let stock of cat.stocks" [value]="stock.symbol">{{ stock.symbol }} - {{ stock.name }}</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="header-right">
+          <div class="quick-stats">
+            <div class="stat">
+              <span class="label">Last</span>
+              <span class="value">${{ getMidPrice() | number:'1.2-2' }}</span>
+            </div>
+            <div class="stat" [class.positive]="getSpreadPercent() < 0.1" [class.warning]="getSpreadPercent() >= 0.1">
+              <span class="label">Spread</span>
+              <span class="value">{{ getSpreadPercent() | number:'1.3-3' }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="orderbook-layout">
+        <!-- Bids Side -->
+        <div class="orderbook-side bids-side">
+          <div class="orderbook-title-bar">
+            <span class="title">BIDS</span>
+            <span class="subtitle">Buy Orders</span>
+          </div>
+          <div class="orderbook-header-row">
+            <span>Size</span>
+            <span>Price</span>
+            <span>Total</span>
+          </div>
+          <div class="orderbook-rows">
+            <div class="orderbook-row bid-row" *ngFor="let bid of cachedOrderBook.bids; let i = index" 
+                 [style.--bar-width]="bid.percent + '%'">
+              <span class="size">{{ bid.size | number }}</span>
+              <span class="price">${{ bid.price | number:'1.2-2' }}</span>
+              <span class="total">${{ bid.total | number:'1.0-0' }}</span>
+              <div class="depth-bar bid-bar"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Center Spread Panel -->
+        <div class="spread-panel">
+          <div class="spread-box">
+            <div class="spread-value-box">
+              <span class="spread-label">SPREAD</span>
+              <span class="spread-amount">${{ getOrderBookSpread() | number:'1.2-2' }}</span>
+              <span class="spread-bps">({{ getSpreadPercent() * 100 | number:'1.2-2' }} bps)</span>
+            </div>
+            <div class="mid-price-box">
+              <span class="mid-label">MID PRICE</span>
+              <span class="mid-amount">${{ getMidPrice() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+          
+          <!-- Quick Trade Buttons -->
+          <div class="quick-trade-section">
+            <div class="quick-trade-title">Quick Trade</div>
+            <div class="quick-buttons buy-buttons">
+              <button *ngFor="let size of quickSizes" class="quick-btn buy" (click)="quickBuy(size)">
+                BUY {{ size }}
+              </button>
+            </div>
+            <div class="quick-buttons sell-buttons">
+              <button *ngFor="let size of quickSizes" class="quick-btn sell" (click)="quickSell(size)">
+                SELL {{ size }}
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Asks Side -->
+        <div class="orderbook-side asks-side">
+          <div class="orderbook-title-bar asks-title">
+            <span class="title">ASKS</span>
+            <span class="subtitle">Sell Orders</span>
+          </div>
+          <div class="orderbook-header-row">
+            <span>Price</span>
+            <span>Size</span>
+            <span>Total</span>
+          </div>
+          <div class="orderbook-rows">
+            <div class="orderbook-row ask-row" *ngFor="let ask of cachedOrderBook.asks; let i = index"
+                 [style.--bar-width]="ask.percent + '%'">
+              <span class="price">${{ ask.price | number:'1.2-2' }}</span>
+              <span class="size">{{ ask.size | number }}</span>
+              <span class="total">${{ ask.total | number:'1.0-0' }}</span>
+              <div class="depth-bar ask-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Time & Sales Panel -->
+    <div class="time-sales-panel">
+      <div class="panel-header">
+        <h3>⏱️ Time & Sales</h3>
+      </div>
+      <div class="time-sales-header">
+        <span>Time</span>
+        <span>Price</span>
+        <span>Size</span>
+      </div>
+      <div class="time-sales-rows">
+        <div class="time-sales-row" *ngFor="let trade of timeSales" 
+             [class.buy-trade]="trade.side === 'BUY'" 
+             [class.sell-trade]="trade.side === 'SELL'">
+          <span class="time">{{ trade.time | date:'HH:mm:ss' }}</span>
+          <span class="price">${{ trade.price | number:'1.2-2' }}</span>
+          <span class="size">{{ trade.size | number }}</span>
+        </div>
+        <div class="empty-trades" *ngIf="timeSales.length === 0">
+          <span>No recent trades</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Arbitrage & Analytics Section -->
+  <section class="analytics-section">
+    <div class="analytics-grid">
+      
+      <!-- Spread Opportunities Scanner -->
+      <div class="analytics-card spread-scanner">
+        <div class="card-header">
+          <h3>🎯 Spread Opportunities</h3>
+          <span class="card-subtitle">Top spreads by basis points</span>
+        </div>
+        <div class="spread-list">
+          <div class="spread-item" *ngFor="let opp of spreadOpportunities" 
+               [class]="getOpportunityClass(opp.opportunity)">
+            <span class="spread-symbol">{{ opp.symbol }}</span>
+            <span class="spread-value">${{ opp.spread | number:'1.4-4' }}</span>
+            <span class="spread-bps">{{ opp.spreadBps | number:'1.2-2' }} bps</span>
+            <span class="spread-badge" [class]="'badge-' + opp.opportunity.toLowerCase()">{{ opp.opportunity }}</span>
+          </div>
+          <div class="empty-state" *ngIf="spreadOpportunities.length === 0">
+            <span>Scanning for opportunities...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Correlated Pairs Arbitrage -->
+      <div class="analytics-card pairs-trading">
+        <div class="card-header">
+          <h3>⚖️ Pairs Trading Signals</h3>
+          <span class="card-subtitle">Statistical arbitrage opportunities</span>
+        </div>
+        <div class="pairs-list">
+          <div class="pair-item" *ngFor="let pair of correlatedPairs" [class]="getSignalClass(pair.signal)">
+            <div class="pair-info">
+              <span class="pair-name">{{ pair.pair }}</span>
+              <span class="pair-corr">ρ={{ pair.correlation | number:'1.2-2' }}</span>
+            </div>
+            <div class="pair-metrics">
+              <span class="divergence" [class.positive]="pair.divergence > 0" [class.negative]="pair.divergence < 0">
+                {{ pair.divergence >= 0 ? '+' : '' }}{{ pair.divergence }}%
+              </span>
+              <span class="signal-badge">{{ pair.signal }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Market Inefficiencies -->
+      <div class="analytics-card inefficiencies">
+        <div class="card-header">
+          <h3>⚠️ Market Inefficiencies</h3>
+          <span class="card-subtitle">Detected anomalies</span>
+        </div>
+        <div class="inefficiency-list">
+          <div class="inefficiency-item" *ngFor="let ineff of marketInefficiencies">
+            <div class="ineff-main">
+              <span class="ineff-symbol">{{ ineff.symbol }}</span>
+              <span class="ineff-type" [class]="'type-' + ineff.type.toLowerCase().replace('_', '-')">{{ ineff.type }}</span>
+            </div>
+            <div class="ineff-metrics">
+              <span class="magnitude">{{ ineff.magnitude | number:'1.2-2' }}{{ ineff.type.includes('SPREAD') ? ' bps' : '%' }}</span>
+              <div class="confidence-bar">
+                <div class="confidence-fill" [style.width.%]="ineff.confidence"></div>
+              </div>
+              <span class="confidence-val">{{ ineff.confidence }}%</span>
+            </div>
+          </div>
+          <div class="empty-state" *ngIf="marketInefficiencies.length === 0">
+            <span>No inefficiencies detected</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Market Breadth -->
+      <div class="analytics-card market-breadth">
+        <div class="card-header">
+          <h3>📊 Market Breadth</h3>
+          <span class="card-subtitle">Advancers vs Decliners</span>
+        </div>
+        <div class="breadth-content">
+          <div class="breadth-chart">
+            <div class="breadth-bar">
+              <div class="advancers-bar" [style.width.%]="(marketBreadth.advancers / allStocks.length) * 100"></div>
+              <div class="decliners-bar" [style.width.%]="(marketBreadth.decliners / allStocks.length) * 100"></div>
+            </div>
+          </div>
+          <div class="breadth-stats">
+            <div class="breadth-stat positive">
+              <span class="stat-icon">▲</span>
+              <span class="stat-count">{{ marketBreadth.advancers }}</span>
+              <span class="stat-label">Advancers</span>
+            </div>
+            <div class="breadth-stat neutral">
+              <span class="stat-icon">●</span>
+              <span class="stat-count">{{ marketBreadth.unchanged }}</span>
+              <span class="stat-label">Unchanged</span>
+            </div>
+            <div class="breadth-stat negative">
+              <span class="stat-icon">▼</span>
+              <span class="stat-count">{{ marketBreadth.decliners }}</span>
+              <span class="stat-label">Decliners</span>
+            </div>
+          </div>
+          <div class="total-volume">
+            <span class="vol-label">Total Market Volume</span>
+            <span class="vol-value">{{ formatVolume(totalMarketVolume) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sector Performance -->
+      <div class="analytics-card sector-perf">
+        <div class="card-header">
+          <h3>🏢 Sector Performance</h3>
+          <span class="card-subtitle">By average change</span>
+        </div>
+        <div class="sector-list">
+          <div class="sector-item" *ngFor="let sector of sectorPerformance">
+            <span class="sector-name">{{ sector.sector }}</span>
+            <div class="sector-bar-container">
+              <div class="sector-bar" 
+                   [class.positive]="sector.change >= 0" 
+                   [class.negative]="sector.change < 0"
+                   [style.width.%]="Math.min(100, Math.abs(sector.change) * 20)">
+              </div>
+            </div>
+            <span class="sector-change" [class.positive]="sector.change >= 0" [class.negative]="sector.change < 0">
+              {{ sector.change >= 0 ? '+' : '' }}{{ sector.change }}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical Indicators -->
+      <div class="analytics-card tech-indicators">
+        <div class="card-header">
+          <h3>📈 Technical Indicators</h3>
+          <span class="card-subtitle">Selected symbol: {{ selectedOrderBookSymbol }}</span>
+        </div>
+        <div class="indicator-grid">
+          <div class="indicator-item">
+            <span class="ind-label">VWAP</span>
+            <span class="ind-value">${{ currentVwap | number:'1.2-2' }}</span>
+          </div>
+          <div class="indicator-item" [class]="getRsiClass(currentRsi)">
+            <span class="ind-label">RSI (14)</span>
+            <span class="ind-value">{{ currentRsi }}</span>
+          </div>
+          <div class="indicator-item">
+            <span class="ind-label">IV (Ann.)</span>
+            <span class="ind-value">{{ currentVolatility }}%</span>
+          </div>
+          <div class="indicator-item">
+            <span class="ind-label">Spread</span>
+            <span class="ind-value">{{ currentSpread | number:'1.2-2' }} bps</span>
+          </div>
+        </div>
+        <div class="rsi-gauge">
+          <div class="gauge-track">
+            <div class="gauge-zones">
+              <div class="zone oversold"></div>
+              <div class="zone neutral"></div>
+              <div class="zone overbought"></div>
+            </div>
+            <div class="gauge-needle" [style.left.%]="currentRsi"></div>
+          </div>
+          <div class="gauge-labels">
+            <span>Oversold</span>
+            <span>Neutral</span>
+            <span>Overbought</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- G4-M4: Options Pricing Engine -->
+      <div class="analytics-card options-pricing">
+        <div class="card-header">
+          <h3>📊 Options Pricing Engine</h3>
+          <span class="card-subtitle">Black-Scholes Calculator</span>
+        </div>
+        <div class="options-controls">
+          <div class="option-input-row">
+            <div class="option-input">
+              <label>Symbol</label>
+              <select [(ngModel)]="optionsPricing.symbol" (change)="updateOptionPrice()">
+                <option *ngFor="let stock of allStocks" [value]="stock.symbol">{{ stock.symbol }}</option>
+              </select>
+            </div>
+            <div class="option-input">
+              <label>Type</label>
+              <select [(ngModel)]="optionsPricing.optionType" (change)="updateOptionPrice()">
+                <option value="CALL">CALL</option>
+                <option value="PUT">PUT</option>
+              </select>
+            </div>
+          </div>
+          <div class="option-input-row">
+            <div class="option-input">
+              <label>Spot Price ($)</label>
+              <input type="number" [(ngModel)]="optionsPricing.spotPrice" step="0.01" readonly>
+            </div>
+            <div class="option-input">
+              <label>Strike Price ($)</label>
+              <input type="number" [(ngModel)]="optionsPricing.strikePrice" step="1" (change)="updateOptionPrice()">
+            </div>
+          </div>
+          <div class="option-input-row">
+            <div class="option-input">
+              <label>Time to Expiry (days)</label>
+              <input type="number" [(ngModel)]="optionsPricing.daysToExpiry" min="1" max="365" (change)="updateOptionPrice()">
+            </div>
+            <div class="option-input">
+              <label>Volatility (%)</label>
+              <input type="number" [(ngModel)]="optionsPricing.volatility" step="1" min="1" max="200" (change)="updateOptionPrice()">
+            </div>
+          </div>
+          <div class="option-input-row">
+            <div class="option-input">
+              <label>Risk-Free Rate (%)</label>
+              <input type="number" [(ngModel)]="optionsPricing.riskFreeRate" step="0.1" min="0" (change)="updateOptionPrice()">
+            </div>
+            <div class="option-input fair-price">
+              <label>Fair Price ($)</label>
+              <span class="price-value">${{ optionsPricing.fairPrice | number:'1.4-4' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="greeks-display">
+          <div class="greeks-header">Greeks</div>
+          <div class="greeks-grid">
+            <div class="greek-item">
+              <span class="greek-label">Delta (Δ)</span>
+              <span class="greek-value" [class.positive]="optionsPricing.greeks.delta >= 0" [class.negative]="optionsPricing.greeks.delta < 0">
+                {{ optionsPricing.greeks.delta | number:'1.4-4' }}
+              </span>
+            </div>
+            <div class="greek-item">
+              <span class="greek-label">Gamma (Γ)</span>
+              <span class="greek-value">{{ optionsPricing.greeks.gamma | number:'1.6-6' }}</span>
+            </div>
+            <div class="greek-item">
+              <span class="greek-label">Theta (Θ)</span>
+              <span class="greek-value negative">{{ optionsPricing.greeks.theta | number:'1.4-4' }}/day</span>
+            </div>
+            <div class="greek-item">
+              <span class="greek-label">Vega (ν)</span>
+              <span class="greek-value">{{ optionsPricing.greeks.vega | number:'1.4-4' }}</span>
+            </div>
+            <div class="greek-item">
+              <span class="greek-label">Rho (ρ)</span>
+              <span class="greek-value">{{ optionsPricing.greeks.rho | number:'1.4-4' }}</span>
+            </div>
+            <div class="greek-item moneyness">
+              <span class="greek-label">Moneyness</span>
+              <span class="greek-value" [class]="getMoneyessClass()">{{ getMoneyness() }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="options-chain" *ngIf="optionsChain.length > 0">
+          <div class="chain-header">
+            <span>Options Chain for {{ optionsPricing.symbol }}</span>
+            <button class="btn-refresh-chain" (click)="loadOptionsChain()">↻</button>
+          </div>
+          <table class="chain-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Strike</th>
+                <th>Price</th>
+                <th>Delta</th>
+                <th>IV</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let option of optionsChain" [class.selected]="option.strike === optionsPricing.strikePrice && option.type === optionsPricing.optionType">
+                <td [class]="option.type === 'CALL' ? 'call' : 'put'">{{ option.type }}</td>
+                <td>${{ option.strike | number:'1.2-2' }}</td>
+                <td>${{ option.price | number:'1.2-2' }}</td>
+                <td>{{ option.delta | number:'1.3-3' }}</td>
+                <td>{{ option.iv | number:'1.1-1' }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- System Status Panel -->
+  <section class="system-status-section">
+    <div class="system-grid">
+      <div class="system-card">
+        <div class="system-header">
+          <h3>🖥️ Exchange Engine</h3>
+          <span class="status-badge online">ONLINE</span>
+        </div>
+        <div class="system-metrics">
+          <div class="metric-row">
+            <span>Orders/sec</span>
+            <span class="metric-val">{{ getOrdersPerSecond() | number:'1.0-0' }}</span>
+          </div>
+          <div class="metric-row">
+            <span>Latency</span>
+            <span class="metric-val">{{ getAvgLatency() }}ms</span>
+          </div>
+          <div class="metric-row">
+            <span>Uptime</span>
+            <span class="metric-val">99.99%</span>
+          </div>
+        </div>
+      </div>
+      <div class="system-card">
+        <div class="system-header">
+          <h3>📡 FIX Gateway</h3>
+          <span class="status-badge" [class.online]="sessionStatus?.connected" [class.offline]="!sessionStatus?.connected">
+            {{ sessionStatus?.connected ? 'CONNECTED' : 'DISCONNECTED' }}
+          </span>
+        </div>
+        <div class="system-metrics">
+          <div class="metric-row">
+            <span>Messages In</span>
+            <span class="metric-val">{{ getMessagesIn() | number }}</span>
+          </div>
+          <div class="metric-row">
+            <span>Messages Out</span>
+            <span class="metric-val">{{ getMessagesOut() | number }}</span>
+          </div>
+          <div class="metric-row">
+            <span>Session</span>
+            <span class="metric-val">FIX.4.4</span>
+          </div>
+        </div>
+      </div>
+      <div class="system-card">
+        <div class="system-header">
+          <h3>💾 Data Store</h3>
+          <span class="status-badge online">HEALTHY</span>
+        </div>
+        <div class="system-metrics">
+          <div class="metric-row">
+            <span>Orders Stored</span>
+            <span class="metric-val">{{ orders.length }}</span>
+          </div>
+          <div class="metric-row">
+            <span>Securities</span>
+            <span class="metric-val">{{ allStocks.length }}</span>
+          </div>
+          <div class="metric-row">
+            <span>DB Status</span>
+            <span class="metric-val">H2 In-Memory</span>
+          </div>
+        </div>
+      </div>
+      <div class="system-card">
+        <div class="system-header">
+          <h3>📊 Market Data</h3>
+          <span class="status-badge online">STREAMING</span>
+        </div>
+        <div class="system-metrics">
+          <div class="metric-row">
+            <span>Quotes/sec</span>
+            <span class="metric-val">{{ getQuotesPerSecond() | number:'1.0-0' }}</span>
+          </div>
+          <div class="metric-row">
+            <span>Symbols</span>
+            <span class="metric-val">{{ allStocks.length }}</span>
+          </div>
+          <div class="metric-row">
+            <span>Last Update</span>
+            <span class="metric-val">{{ getLastUpdateTime() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <footer class="footer">
+    <div class="footer-content">
+      <span class="footer-brand">🏛️ Exchange Trading Platform</span>
+      <span class="footer-info">FIX 4.4 Acceptor | Port 9876 | {{ allStocks.length }} Securities</span>
+      <span class="footer-time">{{ currentTime | date:'HH:mm:ss' }}</span>
+    </div>
+  </footer>
+</div>

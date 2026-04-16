@@ -1,0 +1,574 @@
+/* Watermark: Aarav Joshi */
+$primary: #2563eb;
+$success: #10b981;
+$danger: #ef4444;
+$warning: #f59e0b;
+$bg-card: #ffffff;
+$bg-light: #f8fafc;
+$border: #e2e8f0;
+$text-primary: #1e293b;
+$text-secondary: #64748b;
+$text-muted: #94a3b8;
+
+.broker-commodities-panel {
+  background: $bg-card;
+  border-radius: 16px;
+  border: 1px solid $border;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+// Header
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #fef9c3 0%, #fef3c7 100%);
+  border-bottom: 1px solid $border;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    h3 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 600;
+      color: $text-primary;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .icon {
+        font-size: 22px;
+      }
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: $success;
+      color: white;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+
+      .dot {
+        width: 6px;
+        height: 6px;
+        background: white;
+        border-radius: 50%;
+        animation: blink 1.5s infinite;
+      }
+    }
+  }
+
+  .market-summary {
+    display: flex;
+    gap: 16px;
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 14px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+      .label {
+        font-size: 10px;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .value {
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      &.positive .value { color: $success; }
+      &.negative .value { color: $danger; }
+    }
+  }
+}
+
+// Category Tabs
+.category-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 14px 18px;
+  background: $bg-light;
+  border-bottom: 1px solid $border;
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $border;
+    border-radius: 2px;
+  }
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid $border;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+
+    .tab-icon {
+      font-size: 14px;
+    }
+
+    &:hover {
+      background: $bg-card;
+      border-color: $primary;
+      color: $primary;
+    }
+
+    &.active {
+      background: $primary;
+      border-color: $primary;
+      color: white;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+  }
+}
+
+// Main Content
+.panel-content {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  flex: 1;
+  overflow: hidden;
+}
+
+// Commodities List
+.commodities-list {
+  overflow-y: auto;
+  padding: 12px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $bg-light;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $border;
+    border-radius: 3px;
+
+    &:hover {
+      background: $text-muted;
+    }
+  }
+}
+
+.commodity-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background: $bg-light;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: white;
+    border-color: $border;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  &.selected {
+    background: white;
+    border-color: $primary;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+  }
+
+  .commodity-icon {
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .commodity-info {
+    display: flex;
+    flex-direction: column;
+
+    .symbol {
+      font-weight: 600;
+      color: $text-primary;
+      font-size: 14px;
+    }
+
+    .name {
+      font-size: 11px;
+      color: $text-muted;
+    }
+  }
+
+  .commodity-price {
+    text-align: right;
+
+    .price {
+      display: block;
+      font-weight: 700;
+      color: $text-primary;
+      font-size: 14px;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+
+    .change {
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'SF Mono', 'Consolas', monospace;
+
+      &.positive { color: $success; }
+      &.negative { color: $danger; }
+    }
+  }
+
+  .commodity-volume {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 60px;
+
+    .label {
+      font-size: 9px;
+      color: $text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .value {
+      font-size: 12px;
+      color: $text-secondary;
+      font-family: 'SF Mono', 'Consolas', monospace;
+    }
+  }
+}
+
+// Trading Panel
+.trading-panel {
+  background: $bg-light;
+  border-left: 1px solid $border;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+
+  .selected-info {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    .selected-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+
+      .icon {
+        font-size: 36px;
+      }
+
+      .details {
+        h4 {
+          margin: 0;
+          font-size: 15px;
+          color: $text-primary;
+          font-weight: 600;
+        }
+
+        .symbol-tag {
+          display: inline-block;
+          padding: 2px 8px;
+          background: $bg-light;
+          border-radius: 6px;
+          font-size: 10px;
+          color: $text-secondary;
+          font-weight: 600;
+          margin-top: 4px;
+        }
+      }
+    }
+
+    .current-price {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+
+      .price {
+        font-size: 26px;
+        font-weight: 700;
+        color: $text-primary;
+        font-family: 'SF Mono', 'Consolas', monospace;
+      }
+
+      .change {
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      &.positive .change { color: $success; }
+      &.negative .change { color: $danger; }
+    }
+  }
+
+  .spread-display {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 4px;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+
+    > div {
+      padding: 8px;
+
+      .label {
+        display: block;
+        font-size: 9px;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
+
+      .value {
+        font-size: 12px;
+        font-weight: 600;
+        font-family: 'SF Mono', 'Consolas', monospace;
+      }
+    }
+
+    .bid .value { color: $success; }
+    .ask .value { color: $danger; }
+    .spread {
+      background: $bg-light;
+      border-radius: 8px;
+      .value { color: $text-secondary; }
+    }
+  }
+
+  .order-form {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    .side-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+
+      .side-btn {
+        padding: 12px;
+        border: 2px solid transparent;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+
+        .icon {
+          font-size: 14px;
+        }
+
+        &.buy {
+          background: rgba($success, 0.1);
+          border-color: rgba($success, 0.3);
+          color: $success;
+
+          &:hover, &.active {
+            background: $success;
+            border-color: $success;
+            color: white;
+          }
+        }
+
+        &.sell {
+          background: rgba($danger, 0.1);
+          border-color: rgba($danger, 0.3);
+          color: $danger;
+
+          &:hover, &.active {
+            background: $danger;
+            border-color: $danger;
+            color: white;
+          }
+        }
+      }
+    }
+
+    .order-type-select {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 14px;
+      padding: 10px;
+      background: $bg-light;
+      border-radius: 8px;
+
+      .radio-option {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: $text-secondary;
+        cursor: pointer;
+
+        input[type="radio"] {
+          accent-color: $primary;
+        }
+
+        &:has(input:checked) {
+          color: $primary;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .form-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 14px;
+
+      .field {
+        label {
+          display: block;
+          font-size: 10px;
+          color: $text-muted;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 6px;
+        }
+
+        input {
+          width: 100%;
+          padding: 10px 12px;
+          background: $bg-light;
+          border: 1px solid $border;
+          border-radius: 8px;
+          font-size: 14px;
+          font-family: 'SF Mono', 'Consolas', monospace;
+          color: $text-primary;
+          transition: border-color 0.2s;
+
+          &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+          }
+        }
+      }
+    }
+
+    .order-preview {
+      background: $bg-light;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 14px;
+
+      .preview-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: $text-secondary;
+
+        .total {
+          font-weight: 700;
+          font-size: 16px;
+          color: $text-primary;
+          font-family: 'SF Mono', 'Consolas', monospace;
+        }
+      }
+    }
+
+    .submit-order-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &.buy {
+        background: linear-gradient(135deg, $success, #059669);
+        color: white;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba($success, 0.4);
+        }
+      }
+
+      &.sell {
+        background: linear-gradient(135deg, $danger, #dc2626);
+        color: white;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba($danger, 0.4);
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+// Responsive
+@media (max-width: 1000px) {
+  .panel-content {
+    grid-template-columns: 1fr;
+  }
+
+  .trading-panel {
+    border-left: none;
+    border-top: 1px solid $border;
+  }
+}

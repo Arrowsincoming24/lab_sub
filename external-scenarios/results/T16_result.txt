@@ -1,0 +1,27 @@
+: Adding FIX 4.0 protocol
+: Adding FIX 4.1 protocol
+: Adding FIX 4.2 protocol
+: Adding FIX 4.3 protocol
+: Adding FIX 4.4 protocol
+: Bulding FIX 4.4 help
+: Pipe (batch/log) interface active at \\.\pipe\minifix
+: (C)2009-2013 Björn Ahlqvist, available free of charge from http://elato.se/minifix/
+: Welcome to Mini-FIX 1.5.25!
+: Pipe interface connected
+: Pipe interface disconnected (code 109)
+: Pipe interface connected
+: Batch Session sequence numbers reset
+: SenderCompId set to MINIFIX
+: TargetCompId set to EXCHANGE
+: Batch Connect 127.0.0.1:9876
+: Pipe interface disconnected (code 109)
+: Connect to 127.0.0.1, resolving..
+: IP address 127.0.0.1 port 9876, connecting..
+: Connected to 127.0.0.1:9876 at 20260416-01:48:31 UTC
+< 8=FIX.4.2|9=66|35=A|49=MINIFIX|56=EXCHANGE|34=1|52=20260416-01:48:31|98=0|108=30|10=143|
+> 8=FIX.4.2|9=70|35=A|34=1|49=EXCHANGE|52=20260416-01:48:31.069|56=MINIFIX|98=0|108=30|10=087|
+: <done waiting, message matches>
+< 8=FIX.4.2|9=134|35=F|49=MINIFIX|56=EXCHANGE|34=1|52=20260416-01:48:31|41=NONEXISTENT_ORDER_999|11=1656733005|55=AAPL|54=1|60=20260416-01:48:31|38=100|10=021|
+> 8=FIX.4.2|9=144|35=9|34=2|49=EXCHANGE|52=20260416-01:48:31.086|56=MINIFIX|11=1656733005|37=UNKNOWN|39=8|41=NONEXISTENT_ORDER_999|58=Order not found|102=1|434=1|10=013|
+: T16 PASSED - Cancel of unknown order correctly rejected (35=9)
+: Batch Save to C:\Users\Aarav\OneDrive\Desktop\cmltest\fix-trading-simulator\external-scenarios\results\T16_result.txt
